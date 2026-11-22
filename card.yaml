@@ -28,3 +28,8 @@ class_colors:
   3年7組: 江戸紫
   3年8組: 撫子色
   教職員: 鉄黒
+
+# 公開用の画像（SNS など）で伏せる語句 → 置き換え後。--public を付けたときだけ、タイトルとサブタイトルに適用される
+# 例: npm run sample:public && npm run overview:public
+public_masks:
+  勝田一中: 〇〇〇〇
