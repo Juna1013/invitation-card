@@ -78,7 +78,7 @@ public_masks:                      # 公開用の画像で伏せる語句 → �
 
 - 読込と検証は [config.ts](../src/domain/config.ts)。必須項目の欠落・空文字・不明な配色は、不備をまとめて表示して停止する
 - `map_url`（任意）は会場の地図リンク。**PNG にはクリックできるリンクを埋め込めない**ため、`npm run sample:pdf` で場所欄が `map_url` へのリンクになる PDF（500×740 px 相当の1ページ。カードの PNG を貼り、場所欄の位置にリンクを重ねる。ベクターのままだと線画が重く表示が遅くなるため）を `samples/pdf/` に出力する。PDF の場所欄には、リンクだと分かる印として、文字色と同じ色の薄い下線（不透明度50%）と地図ピンを付ける（青色にしない。9色すべてで配色を保つ）。PNG はリンクが動作しないため、印を付けず見た目は変えない。メールで画像として見せる場合は、メール本文に `map_url` を貼る
-- `public_masks` は、SNS などに公開する画像で語句を伏せるための設定（省略可）。`npm run sample:public` と `npm run overview:public`（`--public`）のときだけ、タイトルとサブタイトルの語句を置き換える。通常の画像は変わらない。公開用の個別カードは `samples/public/cards/`（Git 管理外）、一覧画像は `samples/public/overview.png`（2040×3216 px。X の 4096 px 超の縮小を避けるため、通常の一覧画像より小さい）に出力する
+- `public_masks` は、SNS などに公開する画像で語句を伏せるための設定（省略可）。`npm run sample:public`、`npm run sample:pdf:public`、`npm run overview:public`（`--public`）のときだけ、タイトルとサブタイトルの語句を置き換える。通常の画像は変わらない。公開用の個別カードは `samples/public/cards/`、PDF は `samples/public/pdf/`（いずれも Git 管理外）、一覧画像は `samples/public/overview.png`（2040×3216 px。X の 4096 px 超の縮小を避けるため、通常の一覧画像より小さい）に出力する
 - すべての文言は必須。日付は `YYYY-MM-DD`（存在する日付）、時刻は `HH:MM`（24 時間表記）で書く
 - 日付の表示形式（`2027.01.11`）と通し番号の桁数（3 桁）は文言ではなくコード（[format.ts](../src/domain/format.ts)）で決める
 
@@ -189,7 +189,7 @@ invitation-card/
     preview/                  # 開発用: サンプルCSVのカード一覧
   scripts/
     render-sample.ts          # サンプル PNG の生成
-    render-overview.ts        # クラス別カードの一覧画像（3×3）の生成（npm run overview → samples/overview.png）。委員会などへの共有用。`--public` で語句を伏せた公開用（samples/public/overview.png）
+    render-overview.ts        # クラス別カードの一覧画像（3×3）の生成（npm run sample:pdf && npm run overview → samples/overview.png）。委員会などへの共有用。**PDF 版のデザイン（場所欄に下線と地図ピン）**で並べる。入力は samples/pdf/ のプレビュー PNG（Git 管理外）。`--public`（先に npm run sample:pdf:public）で語句を伏せた公開用（samples/public/overview.png）
     generate-ornament.ts      # 雲と花の SVG を生成（npm run ornament）
   src/assets/ornament/        # 雲と花（生成物）
   samples/roster.sample.csv
