@@ -32,6 +32,9 @@ export type CardProps = {
 /** SVG の線の形だけを取り出し、文字色（--ink）で塗る（元の SVG の線の色に依存しない） */
 const maskOf = (url: string): CSSProperties => ({ WebkitMaskImage: `url(${url})`, maskImage: `url(${url})` });
 
+/** 宛名の標準の文字サイズ（px）。全カード同じ。収まらない長い名前のときだけ縮小する */
+const RECIPIENT_SIZE = 18;
+
 /** 文字列の見かけの幅（em 換算。スペースは狭く数える） */
 const units = (s: string) => [...s].reduce((sum, ch) => sum + (/[ 　]/.test(ch) ? 0.4 : 1), 0);
 /** maxWidth(px) に収まる font-size を上限 max・下限 min の範囲で返す */
@@ -82,7 +85,7 @@ export function Card({ event, person, tokens }: CardProps) {
         </header>
 
         <footer className="card__footer">
-          <Field label="宛名" value={recipient} size={fitSize(recipient, 230, 19, 13)} />
+          <Field label="宛名" value={recipient} size={fitSize(recipient, 230, RECIPIENT_SIZE, 13)} />
           <Field label="日時" value={formatDateTime(event.startsAt)} right />
           <Field label="クラス" value={person.className} />
           {event.fee && <Field label="会費" value={event.fee} right />}
