@@ -113,7 +113,7 @@
   white-space: nowrap;
 }
 
-.card__school {
+.card__subtitle {
   margin-top: 5px;
   font: 500 12px/1.3 var(--mono);
   color: rgba(var(--ink), 0.78);
@@ -158,8 +158,4 @@
   font-weight: 500;
   line-height: 1.3;
   white-space: nowrap;
-}
-
-.field--right {
-  text-align: right;
 }
