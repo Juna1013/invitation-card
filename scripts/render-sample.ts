@@ -63,8 +63,19 @@ try {
     const base = `${formatNo(person.no)}_${person.className}_${person.name.replace(/\s|　/g, '')}`;
     const file = resolve(outDir, `${base}.${isPdf ? 'pdf' : 'png'}`);
     if (isPdf) {
-      // カードと同じ 500x740 の1ページ。角丸の外は透明にする
-      await page.pdf({ path: file, width: '500px', height: '740px', printBackground: true, pageRanges: '1', margin: { top: '0', right: '0', bottom: '0', left: '0' } });
+      // ベクターのまま出力すると線画が重く、ビューアで表示が遅くなる。そこで PNG を1ページに貼り、場所欄の位置にだけリンクを重ねる
+      const png = await page.locator('.sheet').screenshot({ omitBackground: true, type: 'png' });
+      const link = await page.locator('.field__link').boundingBox();
+      const sheet = await page.locator('.sheet').boundingBox();
+      const pdfPage = await context.newPage();
+      const a = link && sheet && event.mapUrl
+        ? `<a href="${event.mapUrl}" style="position:absolute;left:${link.x - sheet.x}px;top:${link.y - sheet.y}px;width:${link.width}px;height:${link.height}px"></a>`
+        : '';
+      await pdfPage.setContent(
+        `<style>@page{size:500px 740px;margin:0}html,body{margin:0}body{position:relative;width:500px;height:740px}img{display:block;width:500px;height:740px}</style><img src="data:image/png;base64,${png.toString('base64')}">${a}`,
+      );
+      await pdfPage.pdf({ path: file, width: '500px', height: '740px', printBackground: true, pageRanges: '1' });
+      await pdfPage.close();
     } else {
       await page.locator('.sheet').screenshot({ path: file, omitBackground: true, type: 'png' });
     }
