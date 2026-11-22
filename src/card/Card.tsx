@@ -29,6 +29,9 @@ export type CardProps = {
   tokens: ThemeTokens;
 };
 
+/** SVG の線の形だけを取り出し、文字色（--ink）で塗る（元の SVG の線の色に依存しない） */
+const maskOf = (url: string): CSSProperties => ({ WebkitMaskImage: `url(${url})`, maskImage: `url(${url})` });
+
 /** 文字列の見かけの幅（em 換算。スペースは狭く数える） */
 const units = (s: string) => [...s].reduce((sum, ch) => sum + (/[ 　]/.test(ch) ? 0.4 : 1), 0);
 /** maxWidth(px) に収まる font-size を上限 max・下限 min の範囲で返す */
@@ -56,9 +59,9 @@ export function Card({ event, person, tokens }: CardProps) {
     <div className="sheet" style={tokens as CSSProperties}>
       <div className="card">
         <div className="card__art" aria-hidden>
-          <img className="card__wagasa card__wagasa--tl" src={asanohaUrl} alt="" />
-          <img className="card__wagasa card__wagasa--c" src={uzuUrl} alt="" />
-          <img className="card__wagasa card__wagasa--br" src={seigaihaUrl} alt="" />
+          <div className="card__wagasa card__wagasa--tl" style={maskOf(asanohaUrl)} />
+          <div className="card__wagasa card__wagasa--c" style={maskOf(uzuUrl)} />
+          <div className="card__wagasa card__wagasa--br" style={maskOf(seigaihaUrl)} />
           <Kasumi id="kasumi-r" className="card__kasumi card__kasumi--r" />
           <Kasumi id="kasumi-l" flip className="card__kasumi card__kasumi--l" />
         </div>

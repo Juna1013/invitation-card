@@ -42,45 +42,50 @@ export function resolveColor(nameOrHex: string): string {
   throw new Error(`不明な配色: ${nameOrHex}`);
 }
 
+/** 文字・線画の色を白にしないプリセット（暗い地色のものだけ） */
+const PRESET_INK: Record<string, string> = {
+  黒: '#d4af37', // 金
+};
+
 export type ThemeTokens = Record<`--${string}`, string>;
 
-/** 暗い地色の上の白文字が満たすコントラスト比 */
+/** 暗い地色の上の文字（白・金など）が満たすコントラスト比 */
 const TARGET_CONTRAST = 4.8;
 /** 濃色文字（#111）とのコントラスト比がこれ以上なら「明るい地色」として扱う */
 const LIGHT_THEME_MIN = 6;
 const DARK_INK = '#111111';
 
 /**
- * 配色1色から、カードに注入する CSS 変数を導出する。
+ * 配色（プリセット名 or #rrggbb）から、カードに注入する CSS 変数を導出する。
  *  - 明るい色（白・黄・緑・橙・ピンク）: 地色はそのまま、文字と線画は濃色
- *  - 暗い色（朱・青・紫・黒）: 文字と線画は白。白文字が TARGET_CONTRAST を満たす最小限の暗さまで地色を暗くする
+ *  - 暗い色（朱・青・紫・黒）: 文字と線画は白（黒は金）。その色が TARGET_CONTRAST を満たす最小限の暗さまで地色を暗くする
  */
-export function deriveTheme(color: string): { tokens: ThemeTokens; minContrast: number } {
+export function deriveTheme(nameOrHex: string): { tokens: ThemeTokens; minContrast: number } {
+  const color = resolveColor(nameOrHex);
   const onLight = contrast(DARK_INK, color);
   if (onLight >= LIGHT_THEME_MIN) {
     return {
       minContrast: onLight,
       tokens: {
         '--card-bg': color,
-        '--ink': '17,17,17',
+        '--ink': toRgb(DARK_INK).join(','),
         '--footer-bg': 'rgba(0,0,0,0.08)',
-        '--wagasa-filter': 'brightness(0)', // 和傘 SVG の薄い線を黒にして透過で重ねる
         '--art-strength': '0.5', // 濃色の線は白線より重く見えるので薄くする
       },
     };
   }
+  const ink = PRESET_INK[nameOrHex] ?? '#ffffff';
   let bg = color;
   for (let t = 0; t <= 0.8; t += 0.02) {
     bg = mix(color, '#000000', t);
-    if (contrast('#ffffff', bg) >= TARGET_CONTRAST) break;
+    if (contrast(ink, bg) >= TARGET_CONTRAST) break;
   }
   return {
-    minContrast: contrast('#ffffff', bg),
+    minContrast: contrast(ink, bg),
     tokens: {
       '--card-bg': bg,
-      '--ink': '255,255,255',
+      '--ink': toRgb(ink).join(','),
       '--footer-bg': 'rgba(0,0,0,0.3)', // フッターは半透明の黒（地色より一段暗い）
-      '--wagasa-filter': 'none',
       '--art-strength': '1',
     },
   };
