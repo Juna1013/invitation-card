@@ -181,6 +181,7 @@ invitation-card/
     preview/                  # 開発用: サンプルCSVのカード一覧
   scripts/
     render-sample.ts          # サンプル PNG の生成
+    render-overview.ts        # クラス別カードの一覧画像（3×3）の生成（npm run overview → samples/overview.png）。委員会などへの共有用
     generate-ornament.ts      # 雲と花の SVG を生成（npm run ornament）
   src/assets/ornament/        # 雲と花（生成物）
   samples/roster.sample.csv
