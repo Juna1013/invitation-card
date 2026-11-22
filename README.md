@@ -68,3 +68,10 @@ event:
 
 - 画像（PNG）にはクリックできるリンクを埋め込めません。リンクが必要な場合は PDF を使うか、メール本文に `map_url` を記載してください。
 - 公開用で伏せる語句は、`card.yaml` の `public_masks` で指定します。
+
+## License 📄
+
+このリポジトリのコードは [MIT License](./LICENSE) で公開しています。ただし、次のものは MIT の対象外です。
+
+- `src/assets/wagasa/` の和傘の SVG（3点）: 出典（[shikosai34/shikosai34-web](https://github.com/shikosai34/shikosai34-web)）にライセンス表記がありません。再利用や再配布の前に、出典側の了承を確認してください。これを使って生成したカード画像（`samples/` 以下を含む）も同様です。
+- フォント（Noto Sans JP・IBM Plex Mono）: [SIL Open Font License 1.1](https://openfontlicense.org)。`@fontsource` のパッケージとして取得します。
