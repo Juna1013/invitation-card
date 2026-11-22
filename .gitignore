@@ -6,3 +6,5 @@ roster.csv
 roster.*.csv
 !samples/roster.sample.csv
 event.toml
+# 公開用の個別カード（中間生成物。公開するのは samples/public/overview.png のみ）
+samples/public/cards/

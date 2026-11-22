@@ -1,6 +1,7 @@
 /**
  * サンプル PNG 生成（サンプル名簿から各クラス1人。氏名はすべて「〇〇 〇〇」の伏字）。
  * 実行: npm run sample  →  samples/cards/ に出力
+ *       npm run sample:public  →  語句を伏せた公開用を samples/public/cards/ に出力
  *
  * 本番の生成コマンド（設定ファイル・検証・書き戻し）は別途。ここは見た目の確認用。
  */
@@ -9,14 +10,18 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import { createServer } from 'vite';
-import { loadConfig } from '../src/domain/config';
+import { loadConfig, maskEvent } from '../src/domain/config';
 import { formatNo } from '../src/domain/format';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const outDir = resolve(root, 'samples/cards');
+// --public: 公開用（card.yaml の public_masks で語句を伏せる）。samples/public/cards/ に出力する
+const isPublic = process.argv.includes('--public');
+const outDir = resolve(root, isPublic ? 'samples/public/cards' : 'samples/cards');
 
 // 文言・クラスごとの配色（設計書 §9）は card.yaml で管理する。教職員は「クラス」欄に「教職員」と入る想定
-const { event, labels, classColors } = await loadConfig(resolve(root, 'card.yaml'));
+const config = await loadConfig(resolve(root, 'card.yaml'));
+const { labels, classColors } = config;
+const event = isPublic ? maskEvent(config.event, config.publicMasks) : config.event;
 
 // 簡易パース（サンプル名簿はカンマを含まない前提）。通し番号は行順に 1 から
 const text = (await readFile(resolve(root, 'samples/roster.sample.csv'), 'utf8')).replace(/^﻿/, '');

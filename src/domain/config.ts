@@ -9,6 +9,8 @@ export type CardConfig = {
   event: EventInfo;
   labels: CardLabels;
   classColors: Record<string, string>;
+  /** 公開用の画像（SNS など）で伏せる語句 → 置き換え後（省略可） */
+  publicMasks: Record<string, string>;
 };
 
 const LABEL_KEYS = {
@@ -81,13 +83,31 @@ export function parseConfig(source: string): CardConfig {
     classColors[cls] = color;
   }
 
+  // 公開用に伏せる語句（任意）。語句も置き換え後も空でない文字列
+  const publicMasks: Record<string, string> = {};
+  if (raw.public_masks !== undefined) {
+    if (!isObject(raw.public_masks)) errors.push('public_masks は「元の語句: 置き換え後」の形式で指定してください');
+    else
+      for (const [from, to] of Object.entries(raw.public_masks)) {
+        if (typeof to !== 'string' || to === '') errors.push(`public_masks.${from} は空でない文字列で指定してください`);
+        else publicMasks[from] = to;
+      }
+  }
+
   if (errors.length > 0) throw new Error(`設定ファイルの不備:\n${errors.map((e) => `  - ${e}`).join('\n')}`);
 
   return {
     event: { title, subtitle, date, startTime, endTime },
     labels,
     classColors,
+    publicMasks,
   };
+}
+
+/** 公開用に、語句（publicMasks）を置き換えた共通情報を返す。タイトルとサブタイトルが対象 */
+export function maskEvent(event: EventInfo, masks: Record<string, string>): EventInfo {
+  const apply = (text: string) => Object.entries(masks).reduce((t, [from, to]) => t.split(from).join(to), text);
+  return { ...event, title: apply(event.title), subtitle: apply(event.subtitle) };
 }
 
 export async function loadConfig(path: string): Promise<CardConfig> {
