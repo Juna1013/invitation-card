@@ -40,6 +40,8 @@ export type CardProps = {
   labels: CardLabels;
   person: Person;
   tokens: ThemeTokens;
+  /** 場所欄にリンクだと分かる印（下線と地図ピン）を付ける。クリックできる PDF 用（PNG では付けない） */
+  linkHint?: boolean;
 };
 
 /** SVG の線の形だけを取り出し、文字色（--ink）で塗る（元の SVG の線の色に依存しない） */
@@ -54,14 +56,23 @@ const units = (s: string) => [...s].reduce((sum, ch) => sum + (/[ 　]/.test(ch)
 const fitSize = (s: string, maxWidth: number, max: number, min: number) =>
   Math.max(min, Math.min(max, Math.floor(maxWidth / units(s))));
 
-function Field({ label, value, size, href }: { label: string; value: string; size?: number; href?: string }) {
+/** 地図ピン（文字色と同じ色の線画） */
+const PinIcon = () => (
+  <svg className="field__pin" viewBox="0 0 16 16" width="14" height="14" aria-hidden>
+    <path d="M8 14.5s4.5-4.2 4.5-8A4.5 4.5 0 0 0 3.5 6.5c0 3.8 4.5 8 4.5 8z" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+    <circle cx="8" cy="6.5" r="1.6" fill="none" stroke="currentColor" strokeWidth="1.4" />
+  </svg>
+);
+
+function Field({ label, value, size, href, hint }: { label: string; value: string; size?: number; href?: string; hint?: boolean }) {
   return (
     <div className="field">
       <div className="field__label">{label}</div>
       <div className="field__value" style={size ? { fontSize: size } : undefined}>
         {href ? (
-          <a className="field__link" href={href}>
+          <a className={hint ? 'field__link field__link--hint' : 'field__link'} href={href}>
             {value}
+            {hint && <PinIcon />}
           </a>
         ) : (
           value
@@ -75,7 +86,7 @@ function Field({ label, value, size, href }: { label: string; value: string; siz
  * 固定デザインの招待パス（Wallet 風）。
  * props は共通情報・文言（ラベル）・1人分・導出済みテーマだけ。色は CSS 変数でのみ受け取る。
  */
-export function Card({ event, labels, person, tokens }: CardProps) {
+export function Card({ event, labels, person, tokens, linkHint = false }: CardProps) {
   const recipient = `${person.name} ${labels.honorific}`;
   return (
     <div className="sheet" style={tokens as CSSProperties}>
@@ -104,7 +115,7 @@ export function Card({ event, labels, person, tokens }: CardProps) {
           <Field label={labels.recipient} value={recipient} size={fitSize(recipient, 230, RECIPIENT_SIZE, 13)} />
           <Field label={labels.datetime} value={`${formatDateDotted(event.date)} ${formatTime(event.startTime)} - ${formatTime(event.endTime)}`} />
           <Field label={labels.className} value={person.className} />
-          <Field label={labels.venue} value={event.venue} size={fitSize(event.venue, 230, 17, 12)} href={event.mapUrl} />
+          <Field label={labels.venue} value={event.venue} size={fitSize(event.venue, linkHint && event.mapUrl ? 206 : 230, 17, 12)} href={event.mapUrl} hint={linkHint} />
         </footer>
       </div>
     </div>
