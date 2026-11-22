@@ -1,6 +1,7 @@
 {
   "name": "invitation-card",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "sample": "tsx scripts/render-sample.ts",
