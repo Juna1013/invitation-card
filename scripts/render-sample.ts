@@ -1,6 +1,8 @@
 /**
  * サンプル PNG 生成（サンプル名簿から各クラス1人。氏名はすべて「〇〇 〇〇」の伏字）。
  * 実行: npm run sample  →  samples/cards/ に出力
+*       npm run sample:pdf  →  場所欄がリンクになる PDF を samples/pdf/ に出力
+ *       npm run sample:pdf  →  場所欄が地図へのリンクになる PDF を samples/pdf/ に出力
  *       npm run sample:public  →  語句を伏せた公開用を samples/public/cards/ に出力
  *
  * 本番の生成コマンド（設定ファイル・検証・書き戻し）は別途。ここは見た目の確認用。
@@ -16,11 +18,13 @@ import { formatNo } from '../src/domain/format';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 // --public: 公開用（card.yaml の public_masks で語句を伏せる）。samples/public/cards/ に出力する
 const isPublic = process.argv.includes('--public');
-const outDir = resolve(root, isPublic ? 'samples/public/cards' : 'samples/cards');
+// --pdf: PNG の代わりに、場所欄が地図へのリンクになる PDF を出力する（card.yaml の event.map_url）
+const isPdf = process.argv.includes('--pdf');
+const outDir = resolve(root, isPdf ? 'samples/pdf' : isPublic ? 'samples/public/cards' : 'samples/cards');
 
 // 文言・クラスごとの配色（設計書 §9）は card.yaml で管理する。教職員は「クラス」欄に「教職員」と入る想定
 const config = await loadConfig(resolve(root, 'card.yaml'));
-const { labels, classColors, mapUrl } = config;
+const { labels, classColors } = config;
 const event = isPublic ? maskEvent(config.event, config.publicMasks) : config.event;
 
 // 簡易パース（サンプル名簿はカンマを含まない前提）。通し番号は行順に 1 から
@@ -56,11 +60,16 @@ try {
   for (const person of targets) {
     const color = classColors[person.className];
     const { minContrast } = await page.evaluate((args) => window.renderCard(args), { event, labels, person, color });
-    const file = resolve(outDir, `${formatNo(person.no)}_${person.className}_${person.name.replace(/\s|　/g, '')}.png`);
-    await page.locator('.sheet').screenshot({ path: file, omitBackground: true, type: 'png' });
+    const base = `${formatNo(person.no)}_${person.className}_${person.name.replace(/\s|　/g, '')}`;
+    const file = resolve(outDir, `${base}.${isPdf ? 'pdf' : 'png'}`);
+    if (isPdf) {
+      // カードと同じ 500x740 の1ページ。角丸の外は透明にする
+      await page.pdf({ path: file, width: '500px', height: '740px', printBackground: true, pageRanges: '1', margin: { top: '0', right: '0', bottom: '0', left: '0' } });
+    } else {
+      await page.locator('.sheet').screenshot({ path: file, omitBackground: true, type: 'png' });
+    }
     console.log(`${file.replace(root + '/', '')}  (${color}, contrast ${minContrast.toFixed(1)})`);
   }
-  if (mapUrl) console.log(`\n地図リンク（メール本文に貼る）: ${mapUrl}`);
 } finally {
   await browser.close();
   await server.close();

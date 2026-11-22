@@ -15,6 +15,7 @@ export type EventInfo = {
   startTime: string; // "17:00"
   endTime: string; // "19:00"
   venue: string; // 会場名
+  mapUrl?: string; // 会場の地図リンク（PDF ではクリックできる。PNG では見た目が変わらない）
 };
 
 /** カードに表示する項目名と敬称 */
@@ -53,12 +54,18 @@ const units = (s: string) => [...s].reduce((sum, ch) => sum + (/[ 　]/.test(ch)
 const fitSize = (s: string, maxWidth: number, max: number, min: number) =>
   Math.max(min, Math.min(max, Math.floor(maxWidth / units(s))));
 
-function Field({ label, value, size }: { label: string; value: string; size?: number }) {
+function Field({ label, value, size, href }: { label: string; value: string; size?: number; href?: string }) {
   return (
     <div className="field">
       <div className="field__label">{label}</div>
       <div className="field__value" style={size ? { fontSize: size } : undefined}>
-        {value}
+        {href ? (
+          <a className="field__link" href={href}>
+            {value}
+          </a>
+        ) : (
+          value
+        )}
       </div>
     </div>
   );
@@ -97,7 +104,7 @@ export function Card({ event, labels, person, tokens }: CardProps) {
           <Field label={labels.recipient} value={recipient} size={fitSize(recipient, 230, RECIPIENT_SIZE, 13)} />
           <Field label={labels.datetime} value={`${formatDateDotted(event.date)} ${formatTime(event.startTime)} - ${formatTime(event.endTime)}`} />
           <Field label={labels.className} value={person.className} />
-          <Field label={labels.venue} value={event.venue} size={fitSize(event.venue, 230, 17, 12)} />
+          <Field label={labels.venue} value={event.venue} size={fitSize(event.venue, 230, 17, 12)} href={event.mapUrl} />
         </footer>
       </div>
     </div>
