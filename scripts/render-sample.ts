@@ -20,7 +20,7 @@ const outDir = resolve(root, isPublic ? 'samples/public/cards' : 'samples/cards'
 
 // 文言・クラスごとの配色（設計書 §9）は card.yaml で管理する。教職員は「クラス」欄に「教職員」と入る想定
 const config = await loadConfig(resolve(root, 'card.yaml'));
-const { labels, classColors } = config;
+const { labels, classColors, mapUrl } = config;
 const event = isPublic ? maskEvent(config.event, config.publicMasks) : config.event;
 
 // 簡易パース（サンプル名簿はカンマを含まない前提）。通し番号は行順に 1 から
@@ -60,6 +60,7 @@ try {
     await page.locator('.sheet').screenshot({ path: file, omitBackground: true, type: 'png' });
     console.log(`${file.replace(root + '/', '')}  (${color}, contrast ${minContrast.toFixed(1)})`);
   }
+  if (mapUrl) console.log(`\n地図リンク（メール本文に貼る）: ${mapUrl}`);
 } finally {
   await browser.close();
   await server.close();

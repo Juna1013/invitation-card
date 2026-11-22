@@ -14,6 +14,7 @@ export type EventInfo = {
   date: string; // "2027-01-11"
   startTime: string; // "17:00"
   endTime: string; // "19:00"
+  venue: string; // 会場名
 };
 
 /** カードに表示する項目名と敬称 */
@@ -22,6 +23,7 @@ export type CardLabels = {
   recipient: string;
   datetime: string;
   className: string;
+  venue: string;
   honorific: string;
 };
 
@@ -95,6 +97,7 @@ export function Card({ event, labels, person, tokens }: CardProps) {
           <Field label={labels.recipient} value={recipient} size={fitSize(recipient, 230, RECIPIENT_SIZE, 13)} />
           <Field label={labels.datetime} value={`${formatDateDotted(event.date)} ${formatTime(event.startTime)} - ${formatTime(event.endTime)}`} />
           <Field label={labels.className} value={person.className} />
+          <Field label={labels.venue} value={event.venue} size={fitSize(event.venue, 230, 17, 12)} />
         </footer>
       </div>
     </div>
