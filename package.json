@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "sample": "tsx scripts/render-sample.ts",
+    "sample:pdf": "tsx scripts/render-sample.ts --pdf",
     "sample:public": "tsx scripts/render-sample.ts --public",
     "overview": "tsx scripts/render-overview.ts",
     "overview:public": "tsx scripts/render-overview.ts --public",
