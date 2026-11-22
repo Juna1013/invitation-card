@@ -1,11 +1,14 @@
 /**
  * 「雲と花」の飾り SVG を一から生成する → src/assets/ornament/cloud-flowers.svg
  *
- *   右上と左下の端から入る雲（横長のカプセル形を段々に重ね、先端を二重線の曲線で巻く）と、
- *   雲に添える花（梅・桜・菊・輪花）。すべて自作の幾何学図形。
+ *   右上と左下の端から入る霞（すやり霞：先端がきれいに丸い、細長い横帯を段々にずらして重ねる）と、
+ *   霞に添える花（梅・桜・菊・輪花）。すべて自作の幾何学図形。
+ *   形の根拠: 霞は「工」「王」の字のように様式化された、横に広がる帯。13世紀以降、帯の先端を丸く、
+ *   輪郭をくっきり描くようになった（すやり霞＝槍霞）。出典: JAANUS「kasumi」
+ *   https://projects.mcah.columbia.edu/jaanus/record/kasumi
  *
  * 座標はカード（500x740 px）と 1:1。色は付けない（カード側で CSS の mask に使い、文字色 --ink で塗る）。
- * 重なる部分は SVG の mask で切り抜く（雲の線は花の中に透けない。後から描く花が手前になる）。
+ * 重なる部分は SVG の mask で切り抜く（下の段の帯が上の段の帯を覆い、霞の線は花の中に透けない。後から描く花が手前になる）。
  * 実行: npm run ornament
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -21,30 +24,26 @@ const rad = (d: number) => (d * Math.PI) / 180;
 const polar = (r: number, deg: number) => [Math.cos(rad(deg)) * r, Math.sin(rad(deg)) * r] as const;
 const seq = (n: number) => Array.from({ length: n }, (_, i) => i);
 
-// ---------------------------------------------------------------- 雲
+// ---------------------------------------------------------------- 霞
 
-type Layer = { y: number; end: number; r: number };
+type Band = { y: number; end: number; r: number };
 
 /**
- * 画面の端（edge）から入る雲の1段。
- * 端から伸びた2本の水平線が、先端（end）で半円につながるカプセル形。内側に、少しずらした小さな半円をもう1本引く。
+ * 画面の端（edge）から入る霞の1段（細長い横帯）。端から伸びた2本の水平線が、先端（end）で半円につながる。
+ * close=true なら、端まで閉じた塗り用の形（下の段が上の段を覆う切り抜きに使う）。
  */
-function cloudLayer(edge: 'left' | 'right', { y, end, r }: Layer): string {
-  const sgn = edge === 'right' ? 1 : -1; // 端から内側へ向かう向きの逆（右端なら左へ伸びる）
+function bandShape(edge: 'left' | 'right', { y, end, r }: Band, close = false): string {
   const far = edge === 'right' ? W + 12 : -12; // 画面の外まで伸ばす
-  const cap = end + sgn * r; // 半円の付け根
-  const sweepOut = edge === 'right' ? 0 : 1;
-  const outline = `M${f(far)} ${f(y - r)} H${f(cap)} A${r} ${r} 0 0 ${sweepOut} ${f(cap)} ${f(y + r)} H${f(far)}`;
-  const ri = r * 0.58;
-  const ic = cap + sgn * r * 0.9; // 内側の半円の付け根（外側より内へずらす）
-  const inner = `M${f(ic)} ${f(y - ri)} A${f(ri)} ${f(ri)} 0 0 ${sweepOut} ${f(ic)} ${f(y + ri)}`;
-  return `<path d="${outline}"/><path d="${inner}"/>`;
+  const cap = end + (edge === 'right' ? r : -r); // 半円の付け根
+  const sweep = edge === 'right' ? 0 : 1;
+  return `M${f(far)} ${f(y - r)} H${f(cap)} A${r} ${r} 0 0 ${sweep} ${f(cap)} ${f(y + r)} H${f(far)}${close ? 'Z' : ''}`;
 }
 
-/** 最上段の1本線 */
-function topLine(edge: 'left' | 'right', y: number, end: number): string {
-  const far = edge === 'right' ? W + 12 : -12;
-  return `<path d="M${f(end)} ${f(y)} H${f(far)}"/>`;
+/** 帯の輪郭（外側）と、輪郭に平行な内側の細い線（輪郭から inset だけ内側） */
+function bandLines(edge: 'left' | 'right', b: Band): string {
+  const inset = 3.6;
+  const inner: Band = { y: b.y, end: b.end + (edge === 'right' ? inset : -inset), r: b.r - inset };
+  return `<path d="${bandShape(edge, b)}"/><path d="${bandShape(edge, inner)}" stroke-width="1.1"/>`;
 }
 
 // ---------------------------------------------------------------- 花
@@ -124,19 +123,23 @@ const drawFlower = (k: Kind, r: number) => ({ ume, sakura, kiku, rin })[k](r);
 
 // ---------------------------------------------------------------- 配置
 
-const RIGHT_LAYERS: Layer[] = [
-  { y: 142, end: 424, r: 10 },
-  { y: 172, end: 380, r: 12 },
-  { y: 202, end: 406, r: 10 },
-  { y: 232, end: 352, r: 12 },
-  { y: 262, end: 394, r: 9 },
+/** 帯は上から下へ。下の段が手前（上の段を覆う）。先端の位置をずらして、段々に見せる */
+const RIGHT_BANDS: Band[] = [
+  { y: 128, end: 430, r: 11 },
+  { y: 148, end: 388, r: 11 },
+  { y: 168, end: 412, r: 11 },
+  { y: 188, end: 366, r: 11 },
+  { y: 208, end: 398, r: 11 },
+  { y: 228, end: 352, r: 11 },
 ];
-const LEFT_LAYERS: Layer[] = [
-  { y: 414, end: 76, r: 10 },
-  { y: 444, end: 120, r: 12 },
-  { y: 474, end: 92, r: 10 },
-  { y: 504, end: 144, r: 12 },
-  { y: 534, end: 106, r: 9 },
+const LEFT_BANDS: Band[] = [
+  { y: 398, end: 70, r: 11 },
+  { y: 418, end: 112, r: 11 },
+  { y: 438, end: 88, r: 11 },
+  { y: 458, end: 132, r: 11 },
+  { y: 478, end: 98, r: 11 },
+  { y: 498, end: 142, r: 11 },
+  { y: 518, end: 108, r: 11 },
 ];
 
 /** 花は先に書いたものが奥、後に書いたものが手前 */
@@ -160,19 +163,30 @@ const FLOWERS: FlowerSpec[] = [
 // ---------------------------------------------------------------- 組み立て
 
 const hole = (fl: FlowerSpec) => `<circle cx="${fl.x}" cy="${fl.y}" r="${f(fl.r * 1.03)}" fill="#000"/>`;
-const maskDef = (id: string, holes: FlowerSpec[]) =>
-  `<mask id="${id}" maskUnits="userSpaceOnUse" x="0" y="0" width="${W}" height="${H}"><rect width="${W}" height="${H}" fill="#fff"/>${holes.map(hole).join('')}</mask>`;
+const maskDef = (id: string, holes: string) =>
+  `<mask id="${id}" maskUnits="userSpaceOnUse" x="0" y="0" width="${W}" height="${H}"><rect width="${W}" height="${H}" fill="#fff"/>${holes}</mask>`;
 
-const masks = [
-  maskDef('cloud-mask', FLOWERS), // 雲：すべての花の下
-  ...FLOWERS.map((_, i) => maskDef(`flower-mask-${i}`, FLOWERS.slice(i + 1))), // 花：手前の花の下
-].join('\n  ');
+const allBands = [
+  ...RIGHT_BANDS.map((b) => ({ edge: 'right' as const, b })),
+  ...LEFT_BANDS.map((b) => ({ edge: 'left' as const, b })),
+];
+const flowerHoles = FLOWERS.map(hole).join('');
 
-const clouds =
-  topLine('right', 112, 452) +
-  RIGHT_LAYERS.map((l) => cloudLayer('right', l)).join('') +
-  topLine('left', 386, 56) +
-  LEFT_LAYERS.map((l) => cloudLayer('left', l)).join('');
+// 帯ごとの mask：自分より下（手前）の帯と、すべての花で切り抜く
+const bandMasks = allBands.map(({ edge, b }, i) => {
+  const later = allBands
+    .slice(i + 1)
+    .filter((o) => o.edge === edge)
+    .map((o) => `<path d="${bandShape(o.edge, o.b, true)}" fill="#000"/>`)
+    .join('');
+  return maskDef(`band-mask-${i}`, later + flowerHoles);
+});
+const flowerMasks = FLOWERS.map((_, i) => maskDef(`flower-mask-${i}`, FLOWERS.slice(i + 1).map(hole).join('')));
+const masks = [...bandMasks, ...flowerMasks].join('\n  ');
+
+const clouds = allBands
+  .map(({ edge, b }, i) => `<g mask="url(#band-mask-${i})">${bandLines(edge, b)}</g>`)
+  .join('\n  ');
 
 const flowers = FLOWERS.map(
   (fl, i) =>
@@ -180,11 +194,13 @@ const flowers = FLOWERS.map(
 ).join('\n  ');
 
 const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round">
-<title>雲と花（線画）</title>
+<title>霞と花（線画）</title>
 <defs>
   ${masks}
 </defs>
-<g stroke-width="2.2" stroke-opacity="0.6" mask="url(#cloud-mask)">${clouds}</g>
+<g stroke-width="2" stroke-opacity="0.65">
+  ${clouds}
+</g>
 <g stroke-width="1.6">
   ${flowers}
 </g>
