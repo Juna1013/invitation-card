@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "sample": "tsx scripts/render-sample.ts",
+    "overview": "tsx scripts/render-overview.ts",
     "ornament": "tsx scripts/generate-ornament.ts"
   },
   "dependencies": {
