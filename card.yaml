@@ -8,6 +8,9 @@ event:
   date: "2027-01-11" # 日時は1行で「2027.01.11 17:00 - 19:00」と表示される
   start_time: "17:00"
   end_time: "19:00"
+  venue: ホテルクリスタルパレス # 会場名（カードの「場所」欄に表示）
+  # 地図リンク（任意）。画像にはリンクを埋め込めないため、生成時に表示される URL をメール本文に貼る
+  map_url: https://www.google.com/maps/search/?api=1&query=%E3%83%9B%E3%83%86%E3%83%AB%E3%82%AF%E3%83%AA%E3%82%B9%E3%82%BF%E3%83%AB%E3%83%91%E3%83%AC%E3%82%B9+%E3%81%B2%E3%81%9F%E3%81%A1%E3%81%AA%E3%81%8B%E5%B8%82
 
 # 項目名（ラベル）と敬称
 labels:
@@ -15,6 +18,7 @@ labels:
   recipient: 宛名
   datetime: 日時
   class: クラス
+  venue: 場所
   honorific: 様 # 宛名の末尾に付く
 
 # 当時のクラス（名簿の値）→ 配色（プリセット名 または #rrggbb）

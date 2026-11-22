@@ -9,6 +9,8 @@ export type CardConfig = {
   event: EventInfo;
   labels: CardLabels;
   classColors: Record<string, string>;
+  /** 会場の地図リンク（任意。画像にはリンクを埋め込めないため、メール本文などに貼る用） */
+  mapUrl?: string;
   /** 公開用の画像（SNS など）で伏せる語句 → 置き換え後（省略可） */
   publicMasks: Record<string, string>;
 };
@@ -18,6 +20,7 @@ const LABEL_KEYS = {
   recipient: 'recipient',
   datetime: 'datetime',
   class: 'className',
+  venue: 'venue',
   honorific: 'honorific',
 } as const satisfies Record<string, keyof CardLabels>;
 
@@ -50,6 +53,12 @@ export function parseConfig(source: string): CardConfig {
   const title = collect(() => requireString(ev, 'title', 'event'), '');
   const subtitle = collect(() => requireString(ev, 'subtitle', 'event'), '');
   // 日付・時刻は書式まで検証し、不備には項目名を付けて報告する
+  const venue = collect(() => requireString(ev, 'venue', 'event'), '');
+  const mapUrl = collect(() => {
+    if (ev.map_url === undefined) return undefined;
+    if (typeof ev.map_url !== 'string' || !/^https?:\/\/\S+$/.test(ev.map_url)) throw new Error('event.map_url は http(s) で始まる URL で指定してください');
+    return ev.map_url;
+  }, undefined);
   const dateTime = (key: string, check: (v: string) => unknown) =>
     collect(() => {
       const v = requireString(ev, key, 'event');
@@ -97,7 +106,8 @@ export function parseConfig(source: string): CardConfig {
   if (errors.length > 0) throw new Error(`設定ファイルの不備:\n${errors.map((e) => `  - ${e}`).join('\n')}`);
 
   return {
-    event: { title, subtitle, date, startTime, endTime },
+    event: { title, subtitle, date, startTime, endTime, venue },
+    mapUrl,
     labels,
     classColors,
     publicMasks,
