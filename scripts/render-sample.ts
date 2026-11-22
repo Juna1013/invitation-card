@@ -2,12 +2,12 @@
  * サンプル PNG 生成（サンプル名簿から各クラス1人。氏名はすべて「〇〇 〇〇」の伏字）。
  * 実行: npm run sample  →  samples/cards/ に出力
 *       npm run sample:pdf  →  場所欄がリンクになる PDF を samples/pdf/ に出力
- *       npm run sample:pdf  →  場所欄が地図へのリンクになる PDF を samples/pdf/ に出力
+ *       npm run sample:pdf  →  場所欄が地図へのリンクになる PDF と、同じ見た目のプレビュー PNG を samples/pdf/ に出力
  *       npm run sample:public  →  語句を伏せた公開用を samples/public/cards/ に出力
  *
  * 本番の生成コマンド（設定ファイル・検証・書き戻し）は別途。ここは見た目の確認用。
  */
-import { mkdir, readFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
@@ -20,7 +20,8 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const isPublic = process.argv.includes('--public');
 // --pdf: PNG の代わりに、場所欄が地図へのリンクになる PDF を出力する（card.yaml の event.map_url）
 const isPdf = process.argv.includes('--pdf');
-const outDir = resolve(root, isPdf ? 'samples/pdf' : isPublic ? 'samples/public/cards' : 'samples/cards');
+// --public を付けると、PDF も PNG も samples/public/ 以下に出力する（学校名を伏せていない通常版を上書きしない）
+const outDir = resolve(root, `samples/${isPublic ? 'public/' : ''}${isPdf ? 'pdf' : 'cards'}`);
 
 // 文言・クラスごとの配色（設計書 §9）は card.yaml で管理する。教職員は「クラス」欄に「教職員」と入る想定
 const config = await loadConfig(resolve(root, 'card.yaml'));
@@ -75,6 +76,8 @@ try {
         `<style>@page{size:500px 740px;margin:0}html,body{margin:0}body{position:relative;width:500px;height:740px}img{display:block;width:500px;height:740px}</style><img src="data:image/png;base64,${png.toString('base64')}">${a}`,
       );
       await pdfPage.pdf({ path: file, width: '500px', height: '740px', printBackground: true, pageRanges: '1' });
+      // 同じ見た目のプレビュー PNG（一覧画像用。リンクは動作しない）
+      await writeFile(file.replace(/\.pdf$/, '.png'), png);
       await pdfPage.close();
     } else {
       await page.locator('.sheet').screenshot({ path: file, omitBackground: true, type: 'png' });
