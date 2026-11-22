@@ -1,14 +1,14 @@
 /** 配色プリセット（設定ファイルからは名前で参照する） */
 export const PRESETS: Record<string, string> = {
-  桜: '#e8a0b4',
-  若草: '#7db46c',
-  翡翠: '#3aa38f',
-  空: '#5b9bd5',
-  藤: '#8e7cc3',
-  朱: '#d9534f',
-  紺: '#1f3a5f',
-  金: '#c9a227',
-  墨: '#2b2b2b',
+  白: '#ffffff',
+  黄: '#f2c744',
+  緑: '#4caf63',
+  朱: '#df4a2c',
+  橙: '#f08a24',
+  青: '#2f6fd0',
+  紫: '#7b4fc1',
+  ピンク: '#f08fb0',
+  黒: '#1c1c1e',
 };
 
 type RGB = [number, number, number];
@@ -44,22 +44,44 @@ export function resolveColor(nameOrHex: string): string {
 
 export type ThemeTokens = Record<`--${string}`, string>;
 
-/** 白文字がこの比率を満たす最小限の暗さまで、配色を暗くする */
+/** 暗い地色の上の白文字が満たすコントラスト比 */
 const TARGET_CONTRAST = 4.8;
+/** 濃色文字（#111）とのコントラスト比がこれ以上なら「明るい地色」として扱う */
+const LIGHT_THEME_MIN = 6;
+const DARK_INK = '#111111';
 
 /**
  * 配色1色から、カードに注入する CSS 変数を導出する。
- * カードは常に白文字の無地背景。白文字が TARGET_CONTRAST を満たす最小限の暗さまで配色を暗くする。
- * （フッターは半透明の黒を重ねるので、背景より暗くなり、コントラストはさらに上がる）
+ *  - 明るい色（白・黄・緑・橙・ピンク）: 地色はそのまま、文字と線画は濃色
+ *  - 暗い色（朱・青・紫・黒）: 文字と線画は白。白文字が TARGET_CONTRAST を満たす最小限の暗さまで地色を暗くする
  */
 export function deriveTheme(color: string): { tokens: ThemeTokens; minContrast: number } {
+  const onLight = contrast(DARK_INK, color);
+  if (onLight >= LIGHT_THEME_MIN) {
+    return {
+      minContrast: onLight,
+      tokens: {
+        '--card-bg': color,
+        '--ink': '17,17,17',
+        '--footer-bg': 'rgba(0,0,0,0.08)',
+        '--wagasa-filter': 'brightness(0)', // 和傘 SVG の薄い線を黒にして透過で重ねる
+        '--art-strength': '0.5', // 濃色の線は白線より重く見えるので薄くする
+      },
+    };
+  }
   let bg = color;
-  for (let t = 0.1; t <= 0.8; t += 0.02) {
+  for (let t = 0; t <= 0.8; t += 0.02) {
     bg = mix(color, '#000000', t);
     if (contrast('#ffffff', bg) >= TARGET_CONTRAST) break;
   }
   return {
     minContrast: contrast('#ffffff', bg),
-    tokens: { '--card-bg': bg },
+    tokens: {
+      '--card-bg': bg,
+      '--ink': '255,255,255',
+      '--footer-bg': 'rgba(0,0,0,0.3)', // フッターは半透明の黒（地色より一段暗い）
+      '--wagasa-filter': 'none',
+      '--art-strength': '1',
+    },
   };
 }
