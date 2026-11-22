@@ -34,6 +34,38 @@
   pointer-events: none;
 }
 
+/* 背景の飾り：和傘（QR を中心に置く）と、画面端から入る霞。線画なので白の透過で重ねる */
+.card__art {
+  position: absolute;
+  inset: 0;
+}
+
+.card__wagasa {
+  position: absolute;
+  left: 50%;
+  top: 347px; /* QR の中心 */
+  width: 440px;
+  height: 440px;
+  margin: -220px 0 0 -220px;
+  opacity: 0.5;
+}
+
+.card__kasumi {
+  position: absolute;
+  width: 160px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.card__kasumi--r {
+  right: -26px;
+  top: 96px;
+}
+
+.card__kasumi--l {
+  left: -26px;
+  top: 420px;
+}
+
 /* ヘッダー：左=ロゴ(タイトル) / 右=GUEST NO. */
 .card__header {
   position: absolute;

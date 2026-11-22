@@ -1,6 +1,8 @@
 import type { CSSProperties } from 'react';
 import { formatDateTime, formatNo } from '../domain/format';
 import type { ThemeTokens } from '../domain/theme';
+import wagasaUrl from '../assets/wagasa/wagasa-uzu.svg';
+import { Kasumi } from './parts/Kasumi';
 import { Qr } from './parts/Qr';
 import './Card.css';
 
@@ -54,6 +56,12 @@ export function Card({ event, person, tokens, qrText }: CardProps) {
   return (
     <div className="sheet" style={tokens as CSSProperties}>
       <div className="card">
+        <div className="card__art" aria-hidden>
+          <img className="card__wagasa" src={wagasaUrl} alt="" />
+          <Kasumi id="kasumi-r" className="card__kasumi card__kasumi--r" />
+          <Kasumi id="kasumi-l" flip className="card__kasumi card__kasumi--l" />
+        </div>
+
         <header className="card__header">
           <div>
             <div className="card__title" style={{ fontSize: fitSize(event.title, 290, 24, 15) }}>

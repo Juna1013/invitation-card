@@ -21,6 +21,7 @@ window.renderCard = async ({ event, person, color }) => {
     root.render(<Card event={event} person={person} tokens={tokens} qrText={qrText(event.rsvpUrl, person.no)} />),
   );
   await document.fonts.ready;
+  await Promise.all([...document.images].map((img) => img.decode().catch(() => {}))); // 和傘 SVG の読込完了を待つ
   await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
   return { minContrast };
 };
