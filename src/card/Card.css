@@ -93,7 +93,26 @@
 
 .card__kasumi--l {
   left: -26px;
-  top: 420px;
+  top: 380px;
+}
+
+/* 霞に添える花。花の下の地色の円で、霞・和傘の線を隠す */
+.card__flowers {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.flower__base {
+  fill: var(--card-bg);
+}
+
+.flower__line {
+  fill: none;
+  stroke: rgba(var(--ink), calc(0.75 * var(--art-strength)));
+  stroke-width: 1.3;
+  stroke-linejoin: round;
 }
 
 /* ヘッダー：左=ロゴ(タイトル) / 右=GUEST NO. */
@@ -150,6 +169,21 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 20px 16px;
+}
+
+/* 柵：フッターの上端に立てる（フッターの上に並ぶ）。SVG の線の形だけを文字色で塗る */
+.card__fence {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100%;
+  height: 60px;
+  background: rgb(var(--ink));
+  opacity: calc(0.6 * var(--art-strength));
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
 }
 
 .field__value {

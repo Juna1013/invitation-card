@@ -4,6 +4,8 @@ import type { ThemeTokens } from '../domain/theme';
 import asanohaUrl from '../assets/wagasa/wagasa-asanoha.svg';
 import seigaihaUrl from '../assets/wagasa/wagasa-seigaiha.svg';
 import uzuUrl from '../assets/wagasa/wagasa-uzu.svg';
+import fenceUrl from '../assets/fence/fence.svg';
+import { Flowers } from './parts/Flowers';
 import { Kasumi } from './parts/Kasumi';
 import './Card.css';
 
@@ -67,6 +69,7 @@ export function Card({ event, person, tokens }: CardProps) {
           <div className="card__wagasa card__wagasa--br" style={maskOf(seigaihaUrl)} />
           <Kasumi id="kasumi-r" className="card__kasumi card__kasumi--r" />
           <Kasumi id="kasumi-l" flip className="card__kasumi card__kasumi--l" />
+          <Flowers />
         </div>
 
         <header className="card__header">
@@ -85,6 +88,7 @@ export function Card({ event, person, tokens }: CardProps) {
         </header>
 
         <footer className="card__footer">
+          <div className="card__fence" style={maskOf(fenceUrl)} />
           <Field label="宛名" value={recipient} size={fitSize(recipient, 230, RECIPIENT_SIZE, 13)} />
           <Field label="日時" value={formatDateTime(event.startsAt)} right />
           <Field label="クラス" value={person.className} />
