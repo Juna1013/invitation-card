@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "sample": "tsx scripts/render-sample.ts"
+    "sample": "tsx scripts/render-sample.ts",
+    "fence": "tsx scripts/generate-fence.ts"
   },
   "dependencies": {
     "@fontsource/ibm-plex-mono": "^5.3.0",
