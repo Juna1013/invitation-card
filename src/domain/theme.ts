@@ -45,27 +45,31 @@ export function resolveColor(nameOrHex: string): string {
 
 export type ThemeTokens = Record<`--${string}`, string>;
 
-/** 配色1色から、カードに注入する CSS 変数を導出する（前景色はコントラストで自動選択） */
-export function deriveTheme(color: string): { tokens: ThemeTokens; fg: string; minContrast: number } {
-  // 前景色ごとに、コントラストを損なう側のグラデーション幅を狭める
-  //   白文字: 明るい側を抑える / 濃色文字: 暗い側を抑える
-  const candidates = [
-    { fg: '#ffffff', from: mix(color, '#ffffff', 0.06), to: mix(color, '#000000', 0.3) },
-    { fg: '#111111', from: mix(color, '#ffffff', 0.2), to: mix(color, '#000000', 0.06) },
-  ].map((c) => ({ ...c, min: Math.min(contrast(c.fg, c.from), contrast(c.fg, c.to)) }));
-  const { fg, from, to, min: minContrast } = candidates[0].min >= candidates[1].min ? candidates[0] : candidates[1];
+/** 白文字がこの比率を満たす最小限の暗さまで、配色を暗くする */
+const TARGET_CONTRAST = 4.8;
+
+/**
+ * 配色1色から、カードに注入する CSS 変数を導出する。
+ * カードは常に白文字。背景の上端（文字が載る明るい側）が TARGET_CONTRAST を満たすまで暗くする。
+ */
+export function deriveTheme(color: string): { tokens: ThemeTokens; minContrast: number } {
+  let top = color;
+  for (let t = 0.1; t <= 0.8; t += 0.02) {
+    top = mix(color, '#000000', t);
+    if (contrast('#ffffff', top) >= TARGET_CONTRAST) break;
+  }
+  const bottom = mix(top, '#000000', 0.5);
+  const accent = mix(color, '#ffffff', 0.35); // 太陽・アイコン円
+  const iconFg = contrast('#111111', accent) > contrast('#ffffff', accent) ? '#111111' : '#ffffff';
   return {
-    fg,
-    minContrast,
+    minContrast: Math.min(contrast('#ffffff', top), contrast('#ffffff', bottom)),
     tokens: {
-      '--card-from': from,
-      '--card-to': to,
-      '--card-fg': fg,
-      '--card-fg-80': alpha(fg, 0.8),
-      '--card-fg-65': alpha(fg, 0.65),
-      '--card-fg-35': alpha(fg, 0.35),
-      '--card-fg-16': alpha(fg, 0.16),
-      '--card-fg-10': alpha(fg, 0.1),
+      '--card-top': top,
+      '--card-bottom': bottom,
+      '--card-accent': accent,
+      '--card-glow': alpha(accent, 0.45),
+      '--icon-bg': accent,
+      '--icon-fg': iconFg,
     },
   };
 }
