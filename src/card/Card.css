@@ -1,33 +1,31 @@
 @import '@fontsource/noto-sans-jp/400.css';
 @import '@fontsource/noto-sans-jp/500.css';
 @import '@fontsource/noto-sans-jp/700.css';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/500.css';
 
 /*
-  固定デザイン。色は直接書かず、すべて --card-* 変数（theme.ts が導出）を参照する。
-  サイズ 500x740（ハガキ 100x148mm の比率）。
+  固定デザイン（Apple Wallet のイベントパス風）。
+  色は --card-* / --icon-* 変数（theme.ts が導出）だけを参照する。文字は常に白。
+  上: パス本体 500x690 / 下: アクションタイル
 */
-.card {
-  --notch-y: 395px;
-  --notch-r: 14px;
-
-  position: relative;
+.sheet {
+  --mono: 'IBM Plex Mono', 'Noto Sans JP', ui-monospace, monospace;
   width: 500px;
-  height: 740px;
-  box-sizing: border-box;
-  border-radius: 28px;
-  overflow: hidden;
-  color: var(--card-fg);
-  background: linear-gradient(135deg, var(--card-from), var(--card-to));
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: #fff;
   font-family: 'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', sans-serif;
-  font-feature-settings: 'palt' 0;
+}
 
-  /* 切り取り線の両端を丸く抜く（背景の透過と両立させるため mask を使う） */
-  -webkit-mask:
-    radial-gradient(circle var(--notch-r) at 0 var(--notch-y), #0000 97%, #000) left / 51% 100% no-repeat,
-    radial-gradient(circle var(--notch-r) at 100% var(--notch-y), #0000 97%, #000) right / 51% 100% no-repeat;
-  mask:
-    radial-gradient(circle var(--notch-r) at 0 var(--notch-y), #0000 97%, #000) left / 51% 100% no-repeat,
-    radial-gradient(circle var(--notch-r) at 100% var(--notch-y), #0000 97%, #000) right / 51% 100% no-repeat;
+/* ---- パス本体 ---- */
+.card {
+  position: relative;
+  height: 690px;
+  border-radius: 26px;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--card-top), var(--card-bottom));
 }
 
 /* 細いハイライト線 */
@@ -36,123 +34,188 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.35);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
   pointer-events: none;
 }
 
-.card__header {
+/* 背景アート：朝日（新しい門出）をモチーフにした抽象図形 */
+.card__art {
   position: absolute;
-  top: 36px;
-  left: 35px;
-  right: 35px;
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.3em;
-  color: var(--card-fg-80);
+  inset: 0;
 }
 
-/* ストリップ：同心円の幾何学パターン＋タイトル */
-.card__strip {
+.card__rays {
   position: absolute;
-  top: 70px;
-  left: 35px;
-  right: 35px;
-  height: 170px;
-  border-radius: 18px;
-  overflow: hidden;
-  background:
-    repeating-radial-gradient(circle at 88% 12%, transparent 0 22px, var(--card-fg-16) 22px 23.5px),
-    var(--card-fg-10);
+  inset: 0;
+  background: repeating-conic-gradient(from 0deg at 50% 250px, rgba(255, 255, 255, 0.1) 0 3deg, transparent 3deg 10deg);
+  -webkit-mask-image: radial-gradient(circle at 50% 250px, #000 0, rgba(0, 0, 0, 0.6) 180px, transparent 430px);
+  mask-image: radial-gradient(circle at 50% 250px, #000 0, rgba(0, 0, 0, 0.6) 180px, transparent 430px);
+}
+
+.card__sun {
+  position: absolute;
+  left: 50%;
+  top: 250px;
+  width: 200px;
+  height: 200px;
+  margin: -100px 0 0 -100px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, rgba(255, 255, 255, 0.6), var(--card-accent) 55%, var(--card-glow) 100%);
+  box-shadow:
+    0 0 0 22px rgba(255, 255, 255, 0.07),
+    0 0 0 50px rgba(255, 255, 255, 0.05),
+    0 0 90px 30px var(--card-glow);
+}
+
+/* 下部は暗くして、文字を読みやすくする */
+.card__shade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 300px;
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.4));
+}
+
+/* ヘッダー：左=ロゴ(タイトル) / 右=GUEST NO. */
+.card__header {
+  position: absolute;
+  top: 26px;
+  left: 26px;
+  right: 26px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
 }
 
 .card__title {
-  position: absolute;
-  left: 20px;
-  bottom: 22px;
   font-weight: 700;
-  line-height: 1.1;
+  line-height: 1.15;
   white-space: nowrap;
-}
-
-.card__who {
-  position: absolute;
-  top: 262px;
-  left: 35px;
-  right: 35px;
 }
 
 .card__school {
-  font-size: 18px;
-  font-weight: 500;
-  color: var(--card-fg-80);
+  margin-top: 5px;
+  font: 500 12px/1.3 var(--mono);
+  color: rgba(255, 255, 255, 0.78);
 }
 
-.card__recipient {
-  margin-top: 12px;
-  font-weight: 700;
-  line-height: 1.2;
+.card__guest {
+  text-align: right;
+  font-family: var(--mono);
+}
+
+.label,
+.field__label {
+  font: 500 11px/1.3 var(--mono);
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.card__guest-no {
+  margin-top: 2px;
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+
+/* QR：白い角丸の台座 */
+.card__qr {
+  position: absolute;
+  left: 50%;
+  top: 372px;
+  width: 140px;
+  height: 140px;
+  margin-left: -70px;
+  padding: 10px;
+  box-sizing: border-box;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.card__qr svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* 下部の項目：ラベル(等幅・薄)＋値 */
+.card__info {
+  position: absolute;
+  left: 26px;
+  right: 26px;
+  bottom: 28px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 20px 16px;
+}
+
+.field__value {
+  margin-top: 3px;
+  font-size: 17px;
+  font-weight: 500;
+  line-height: 1.3;
   white-space: nowrap;
 }
 
-/* 切り取り線 */
-.card__perf {
-  position: absolute;
-  top: var(--notch-y);
-  left: 24px;
-  right: 24px;
-  border-top: 2px dashed var(--card-fg-35);
+.field--right {
+  text-align: right;
 }
 
-.card__info {
-  position: absolute;
-  top: 430px;
-  left: 35px;
-  right: 35px;
-  margin: 0;
+/* ---- アクションタイル ---- */
+.tiles {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 22px 20px;
+  gap: 12px;
 }
 
-.card__field dt {
+.tile {
+  box-sizing: border-box;
+  min-height: 112px;
+  padding: 16px;
+  border-radius: 22px;
+  background: rgba(28, 28, 30, 0.96);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.tile--wide {
+  grid-column: 1 / -1;
+  min-height: 0;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.tile__icon {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--icon-bg);
+  color: var(--icon-fg);
+}
+
+.tile__title {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.tile__sub {
+  margin-top: 2px;
   font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--card-fg-65);
+  line-height: 1.5;
+  color: #a1a1a6;
 }
 
-.card__field dd {
-  margin: 4px 0 0;
-  font-size: 19px;
-  font-weight: 700;
-  line-height: 1.35;
-}
-
-.card__message {
-  position: absolute;
-  top: 600px;
-  left: 35px;
-  right: 35px;
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.7;
-  color: var(--card-fg-80);
+.tile--wide .tile__sub {
+  font-size: 13px;
+  line-height: 1.6;
   text-wrap: pretty;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.card__no {
-  position: absolute;
-  right: 35px;
-  bottom: 28px;
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  font-variant-numeric: tabular-nums;
-  color: var(--card-fg-80);
 }
