@@ -159,12 +159,3 @@
   line-height: 1.3;
   white-space: nowrap;
 }
-
-.field--right {
-  text-align: right;
-}
-
-/* 日時のように値が2行になる項目は、左側の2項目（宛名・クラス）と同じ高さにまたがる */
-.field--tall {
-  grid-row: span 2;
-}

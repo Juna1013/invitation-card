@@ -51,26 +51,13 @@ const units = (s: string) => [...s].reduce((sum, ch) => sum + (/[ 　]/.test(ch)
 const fitSize = (s: string, maxWidth: number, max: number, min: number) =>
   Math.max(min, Math.min(max, Math.floor(maxWidth / units(s))));
 
-type FieldProps = {
-  label: string;
-  /** 配列のときは1要素を1行として、複数行で表示する */
-  value: string | string[];
-  right?: boolean;
-  /** 縦に2行分の高さを使う */
-  tall?: boolean;
-  size?: number;
-};
-
-function Field({ label, value, right, tall, size }: FieldProps) {
-  const className = ['field', right && 'field--right', tall && 'field--tall'].filter(Boolean).join(' ');
+function Field({ label, value, size }: { label: string; value: string; size?: number }) {
   return (
-    <div className={className}>
+    <div className="field">
       <div className="field__label">{label}</div>
-      {(Array.isArray(value) ? value : [value]).map((line, i) => (
-        <div key={i} className="field__value" style={size ? { fontSize: size } : undefined}>
-          {line}
-        </div>
-      ))}
+      <div className="field__value" style={size ? { fontSize: size } : undefined}>
+        {value}
+      </div>
     </div>
   );
 }
@@ -106,12 +93,7 @@ export function Card({ event, labels, person, tokens }: CardProps) {
 
         <footer className="card__footer">
           <Field label={labels.recipient} value={recipient} size={fitSize(recipient, 230, RECIPIENT_SIZE, 13)} />
-          <Field
-            label={labels.datetime}
-            value={[formatDateDotted(event.date), `${formatTime(event.startTime)} - ${formatTime(event.endTime)}`]}
-            right
-            tall
-          />
+          <Field label={labels.datetime} value={`${formatDateDotted(event.date)} ${formatTime(event.startTime)} - ${formatTime(event.endTime)}`} />
           <Field label={labels.className} value={person.className} />
         </footer>
       </div>
