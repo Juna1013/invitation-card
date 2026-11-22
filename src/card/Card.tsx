@@ -1,7 +1,6 @@
-import type { CSSProperties, ReactNode } from 'react';
-import { formatDate, formatDateTime, formatNo } from '../domain/format';
+import type { CSSProperties } from 'react';
+import { formatDateTime, formatNo } from '../domain/format';
 import type { ThemeTokens } from '../domain/theme';
-import { Icon, type IconName } from './parts/Icon';
 import { Qr } from './parts/Qr';
 import './Card.css';
 
@@ -11,10 +10,7 @@ export type EventInfo = {
   title: string;
   year: number;
   startsAt: string; // "2027-01-11 18:00"
-  venue: string;
   fee?: string;
-  deadline?: string; // "2026-12-20"
-  message?: string;
   rsvpUrl?: string; // 出欠フォーム（QR に使う）
 };
 
@@ -49,22 +45,8 @@ function Field({ label, value, right, size }: { label: string; value: string; ri
   );
 }
 
-function Tile({ icon, title, children, wide }: { icon: IconName; title: string; children: ReactNode; wide?: boolean }) {
-  return (
-    <div className={wide ? 'tile tile--wide' : 'tile'}>
-      <div className="tile__icon">
-        <Icon name={icon} />
-      </div>
-      <div className="tile__body">
-        <div className="tile__title">{title}</div>
-        <div className="tile__sub">{children}</div>
-      </div>
-    </div>
-  );
-}
-
 /**
- * 固定デザインの招待パス（Wallet 風）。上: パス本体、下: アクションタイル。
+ * 固定デザインの招待パス（Wallet 風）。
  * props は共通情報・1人分・導出済みテーマ・QR文字列だけ。色は CSS 変数でのみ受け取る。
  */
 export function Card({ event, person, tokens, qrText }: CardProps) {
@@ -103,22 +85,6 @@ export function Card({ event, person, tokens, qrText }: CardProps) {
           <Field label="クラス" value={person.className} />
           {event.fee && <Field label="会費" value={event.fee} right />}
         </div>
-      </div>
-
-      <div className="tiles">
-        {event.deadline && (
-          <Tile icon="clock" title="返信期限">
-            {formatDate(event.deadline)}
-          </Tile>
-        )}
-        <Tile icon="pin" title="会場">
-          {event.venue}
-        </Tile>
-        {event.message && (
-          <Tile icon="chat" title="幹事より" wide>
-            {event.message}
-          </Tile>
-        )}
       </div>
     </div>
   );

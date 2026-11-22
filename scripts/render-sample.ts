@@ -20,10 +20,7 @@ const event: EventInfo = {
   title: '成人式 同窓会',
   year: 2027,
   startsAt: '2027-01-11 18:00',
-  venue: 'ホテル○○ 2F 宴会場',
   fee: '5,000円',
-  deadline: '2026-12-20',
-  message: '久しぶりに、みんなで会いましょう！出欠の返信をお待ちしています。',
   rsvpUrl: 'https://example.com/rsvp', // サンプル用のダミー（example.com は予約ドメイン）
 };
 
@@ -64,8 +61,8 @@ const url = `${server.resolvedUrls!.local[0]}render.html`;
 
 const browser = await chromium.launch();
 try {
-  // 幅 500 CSS px × 2.4 = 1200 px（高さはタイルの有無で決まる）
-  const context = await browser.newContext({ viewport: { width: 500, height: 1100 }, deviceScaleFactor: 2.4 });
+  // 500x740 CSS px × 2.4 = 1200x1776 px
+  const context = await browser.newContext({ viewport: { width: 500, height: 740 }, deviceScaleFactor: 2.4 });
   const page = await context.newPage();
   page.on('pageerror', (e) => console.error('[page error]', e.message));
   await page.goto(url);
