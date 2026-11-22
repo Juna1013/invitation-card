@@ -5,8 +5,7 @@ import asanohaUrl from '../assets/wagasa/wagasa-asanoha.svg';
 import seigaihaUrl from '../assets/wagasa/wagasa-seigaiha.svg';
 import uzuUrl from '../assets/wagasa/wagasa-uzu.svg';
 import fenceUrl from '../assets/fence/fence.svg';
-import { Flowers } from './parts/Flowers';
-import { Kasumi } from './parts/Kasumi';
+import ornamentUrl from '../assets/ornament/cloud-flowers.svg';
 import './Card.css';
 
 /** 全カード共通の情報 */
@@ -67,9 +66,7 @@ export function Card({ event, person, tokens }: CardProps) {
           <div className="card__wagasa card__wagasa--tl" style={maskOf(asanohaUrl)} />
           <div className="card__wagasa card__wagasa--c" style={maskOf(uzuUrl)} />
           <div className="card__wagasa card__wagasa--br" style={maskOf(seigaihaUrl)} />
-          <Kasumi id="kasumi-r" className="card__kasumi card__kasumi--r" />
-          <Kasumi id="kasumi-l" flip className="card__kasumi card__kasumi--l" />
-          <Flowers />
+          <div className="card__ornament" style={maskOf(ornamentUrl)} />
         </div>
 
         <header className="card__header">
