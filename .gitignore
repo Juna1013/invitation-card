@@ -1,0 +1,8 @@
+out/
+node_modules/
+.DS_Store
+# 本物の名簿（個人情報）
+roster.csv
+roster.*.csv
+!samples/roster.sample.csv
+event.toml
