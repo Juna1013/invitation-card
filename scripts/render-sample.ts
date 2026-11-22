@@ -59,7 +59,7 @@ try {
 
   for (const person of targets) {
     const color = classColors[person.className];
-    const { minContrast } = await page.evaluate((args) => window.renderCard(args), { event, labels, person, color });
+    const { minContrast } = await page.evaluate((args) => window.renderCard(args), { event, labels, person, color, linkHint: isPdf });
     const base = `${formatNo(person.no)}_${person.className}_${person.name.replace(/\s|　/g, '')}`;
     const file = resolve(outDir, `${base}.${isPdf ? 'pdf' : 'png'}`);
     if (isPdf) {
