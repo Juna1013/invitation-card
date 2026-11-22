@@ -39,29 +39,41 @@
 | 入力 | 中身 | 粒度 |
 |---|---|---|
 | 名簿 CSV | 氏名・当時のクラス（＋任意で通し番号） | 1行 = 1人 = 1枚 |
-| 設定ファイル（TOML） | 学校名・タイトル・開催年・日時・会費・クラス別の配色 | 全カード共通 |
+| 設定ファイル（YAML） | カードに記載する文言（学校名・タイトル・開催年・日時・会費・項目名・敬称）とクラス別の配色 | 全カード共通。**カードの文言はこの1ファイルだけで管理する** |
 
-```toml
-# event.toml（例）
-school    = "○○中学校"
-title     = "成人式 同窓会"
-year      = 2027
-starts_at = "2027-01-11 18:00"
-fee       = "5,000円"
+[card.yaml](../card.yaml)（例）：
 
-default_color = "青"
+```yaml
+event:
+  school: ○○中学校
+  title: 成人式 同窓会
+  year: 2027
+  starts_at: "2027-01-11 18:00"   # 表示は「1月11日(月) 18:00」に変換
+  fee: 5,000円                     # 省略または空なら「会費」欄を表示しない
 
-[class_colors]          # 当時のクラス（名簿の値）→ 配色（プリセット名 or #色コード）
-"3年1組" = "白"
-"3年2組" = "黄"
-"3年3組" = "緑"
-"3年4組" = "朱"
-"3年5組" = "橙"
-"3年6組" = "青"
-"3年7組" = "紫"
-"3年8組" = "ピンク"
-"教職員" = "黒"
+labels:                            # 項目名と敬称
+  guest_no: GUEST NO.
+  recipient: 宛名
+  datetime: 日時
+  class: クラス
+  fee: 会費
+  honorific: 様                    # 宛名の末尾に付く
+
+class_colors:                      # 当時のクラス（名簿の値）→ 配色（プリセット名 or #色コード）
+  3年1組: 白
+  3年2組: 黄
+  3年3組: 緑
+  3年4組: 朱
+  3年5組: 橙
+  3年6組: 青
+  3年7組: 紫
+  3年8組: ピンク
+  教職員: 黒
 ```
+
+- 読込と検証は [config.ts](../src/domain/config.ts)。必須項目の欠落・空文字・不明な配色は、不備をまとめて表示して停止する
+- `event.fee` だけは任意（省略時は「会費」欄を表示しない）。それ以外の文言は必須
+- 日時の表示形式（`1月11日(月) 18:00`）と通し番号の桁数（3 桁）は文言ではなくコード（[format.ts](../src/domain/format.ts)）で決める
 
 ### 名簿 CSV
 
@@ -136,7 +148,7 @@ Apple Wallet のイベントパスの構成に合わせた1枚のカード。CSS
 | コンポーネント | React（Preact でも可）＋ CSS（CSS 変数でテーマ注入） | 部品単位で管理でき、デザインの修正が容易 |
 | 開発用プレビュー | Vite dev server | サンプル CSV のカード一覧をホットリロードで確認 |
 | PNG 化 | Playwright（Chromium）で要素スクリーンショット、`omitBackground` で透過 | CSS の再現性が最も高い |
-| CSV / TOML | `csv-parse` / `smol-toml`、文字コード判別に `iconv-lite` 等 | |
+| CSV / YAML | `csv-parse` / `yaml`（導入済み）、文字コード判別に `iconv-lite` 等 | |
 | フォント | Noto Sans JP・IBM Plex Mono（いずれも OFL）を同梱（`@fontsource`） | `document.fonts.ready` を待ってから撮影 |
 
 ### PNG 化の方式の比較
@@ -159,7 +171,7 @@ invitation-card/
     domain/
       theme.ts                # 色導出・コントラスト計算・プリセット（純粋関数）
       format.ts               # 日時・通し番号の整形
-      config.ts               # 設定ファイル読込・検証
+      config.ts               # 設定ファイル（card.yaml）の読込・検証
       roster.ts               # 名簿CSV読込・列名の吸収・採番・検証
     cli/
       generate.ts             # エントリ: 読込 → 検証 → 撮影 → 保存
@@ -176,7 +188,7 @@ invitation-card/
 
 設計上のルール：`Card` は `event`（共通情報）、`person`（1人分）、`tokens`（導出済みの色）だけを受け取る純粋な表示コンポーネントにする。「デザイン共通」を構造で保証する。
 
-実行イメージ：`npm run generate -- roster.csv --config event.toml -o out/`
+実行イメージ：`npm run generate -- roster.csv --config card.yaml -o out/`
 
 ## 6. 処理フロー
 
