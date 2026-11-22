@@ -23,7 +23,7 @@ const isPdf = process.argv.includes('--pdf');
 // --public を付けると、PDF も PNG も samples/public/ 以下に出力する（学校名を伏せていない通常版を上書きしない）
 const outDir = resolve(root, `samples/${isPublic ? 'public/' : ''}${isPdf ? 'pdf' : 'cards'}`);
 
-// 文言・クラスごとの配色（設計書 §9）は card.yaml で管理する。教職員は「クラス」欄に「教職員」と入る想定
+// 文言・クラスごとの配色（設計書 §9）は card.yaml で管理する。教職員等は「区分」欄に「教職員等」と入る想定
 const config = await loadConfig(resolve(root, 'card.yaml'));
 const { labels, classColors } = config;
 const event = isPublic ? maskEvent(config.event, config.publicMasks) : config.event;
