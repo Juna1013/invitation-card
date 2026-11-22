@@ -68,9 +68,13 @@ class_colors:                      # 当時のクラス（名簿の値）→ 配
   3年7組: 江戸紫
   3年8組: 撫子色
   教職員: 鉄黒
+
+public_masks:                      # 公開用の画像で伏せる語句 → 置き換え後（省略可）
+  勝田一中: 〇〇〇〇
 ```
 
 - 読込と検証は [config.ts](../src/domain/config.ts)。必須項目の欠落・空文字・不明な配色は、不備をまとめて表示して停止する
+- `public_masks` は、SNS などに公開する画像で語句を伏せるための設定（省略可）。`npm run sample:public` と `npm run overview:public`（`--public`）のときだけ、タイトルとサブタイトルの語句を置き換える。通常の画像は変わらない。公開用の個別カードは `samples/public/cards/`（Git 管理外）、一覧画像は `samples/public/overview.png`（2040×3216 px。X の 4096 px 超の縮小を避けるため、通常の一覧画像より小さい）に出力する
 - すべての文言は必須。日付は `YYYY-MM-DD`（存在する日付）、時刻は `HH:MM`（24 時間表記）で書く
 - 日付の表示形式（`2027.01.11`）と通し番号の桁数（3 桁）は文言ではなくコード（[format.ts](../src/domain/format.ts)）で決める
 
@@ -181,7 +185,7 @@ invitation-card/
     preview/                  # 開発用: サンプルCSVのカード一覧
   scripts/
     render-sample.ts          # サンプル PNG の生成
-    render-overview.ts        # クラス別カードの一覧画像（3×3）の生成（npm run overview → samples/overview.png）。委員会などへの共有用
+    render-overview.ts        # クラス別カードの一覧画像（3×3）の生成（npm run overview → samples/overview.png）。委員会などへの共有用。`--public` で語句を伏せた公開用（samples/public/overview.png）
     generate-ornament.ts      # 雲と花の SVG を生成（npm run ornament）
   src/assets/ornament/        # 雲と花（生成物）
   samples/roster.sample.csv
