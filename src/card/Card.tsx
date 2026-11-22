@@ -16,6 +16,16 @@ export type EventInfo = {
   fee?: string;
 };
 
+/** カードに表示する項目名と敬称 */
+export type CardLabels = {
+  guestNo: string;
+  recipient: string;
+  datetime: string;
+  className: string;
+  fee: string;
+  honorific: string;
+};
+
 /** 1人分の情報 */
 export type Person = {
   name: string;
@@ -25,6 +35,7 @@ export type Person = {
 
 export type CardProps = {
   event: EventInfo;
+  labels: CardLabels;
   person: Person;
   tokens: ThemeTokens;
 };
@@ -54,10 +65,10 @@ function Field({ label, value, right, size }: { label: string; value: string; ri
 
 /**
  * 固定デザインの招待パス（Wallet 風）。
- * props は共通情報・1人分・導出済みテーマだけ。色は CSS 変数でのみ受け取る。
+ * props は共通情報・文言（ラベル）・1人分・導出済みテーマだけ。色は CSS 変数でのみ受け取る。
  */
-export function Card({ event, person, tokens }: CardProps) {
-  const recipient = `${person.name} 様`;
+export function Card({ event, labels, person, tokens }: CardProps) {
+  const recipient = `${person.name} ${labels.honorific}`;
   return (
     <div className="sheet" style={tokens as CSSProperties}>
       <div className="card">
@@ -78,16 +89,16 @@ export function Card({ event, person, tokens }: CardProps) {
             </div>
           </div>
           <div className="card__guest">
-            <div className="label">GUEST NO.</div>
+            <div className="label">{labels.guestNo}</div>
             <div className="card__guest-no">{formatNo(person.no)}</div>
           </div>
         </header>
 
         <footer className="card__footer">
-          <Field label="宛名" value={recipient} size={fitSize(recipient, 230, RECIPIENT_SIZE, 13)} />
-          <Field label="日時" value={formatDateTime(event.startsAt)} right />
-          <Field label="クラス" value={person.className} />
-          {event.fee && <Field label="会費" value={event.fee} right />}
+          <Field label={labels.recipient} value={recipient} size={fitSize(recipient, 230, RECIPIENT_SIZE, 13)} />
+          <Field label={labels.datetime} value={formatDateTime(event.startsAt)} right />
+          <Field label={labels.className} value={person.className} />
+          {event.fee && <Field label={labels.fee} value={event.fee} right />}
         </footer>
       </div>
     </div>
