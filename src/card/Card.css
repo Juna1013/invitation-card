@@ -34,7 +34,7 @@
   pointer-events: none;
 }
 
-/* 背景の飾り：和傘（QR を中心に置く）と、画面端から入る霞。線画なので白の透過で重ねる */
+/* 背景の飾り：和傘（カード中央）と、画面端から入る霞。線画なので白の透過で重ねる */
 .card__art {
   position: absolute;
   inset: 0;
@@ -43,7 +43,7 @@
 .card__wagasa {
   position: absolute;
   left: 50%;
-  top: 347px; /* QR の中心 */
+  top: 347px; /* ヘッダーとフッターの間の中央 */
   width: 440px;
   height: 440px;
   margin: -220px 0 0 -220px;
@@ -106,26 +106,6 @@
   font-size: 19px;
   font-weight: 500;
   letter-spacing: 0.06em;
-}
-
-/* QR：白い角丸の台座。ヘッダーとフッターの間の中央に置く */
-.card__qr {
-  position: absolute;
-  left: 50%;
-  top: 252px;
-  width: 190px;
-  height: 190px;
-  margin-left: -95px;
-  padding: 14px;
-  box-sizing: border-box;
-  background: #fff;
-  border-radius: 20px;
-}
-
-.card__qr svg {
-  display: block;
-  width: 100%;
-  height: 100%;
 }
 
 /* フッター：半透明の暗いパネル。ラベル(等幅・薄)＋値 */

@@ -21,7 +21,6 @@ const event: EventInfo = {
   year: 2027,
   startsAt: '2027-01-11 18:00',
   fee: '5,000円',
-  rsvpUrl: 'https://example.com/rsvp', // サンプル用のダミー（example.com は予約ドメイン）
 };
 
 // クラス順に プリセットを割り当てる（設計書 §9）
