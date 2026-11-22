@@ -55,29 +55,31 @@
   mask-position: center;
 }
 
-/* 傘の中心 (0, 200)、傘の直径 270 → 画像幅 300（ヘッダーの文字にかからない位置） */
+/*
+  3つの傘は同じ大きさ（半径 108、画像幅 240）で、斜め一直線に等間隔で並べる。
+  中心 (0, 235) → (250, 345) → (500, 455)。中心間の距離は 273、傘と傘のすき間は 57 で等しい。
+  左上と右下は中心がカードの端にあるので、半分だけ顔を出す。
+*/
 .card__wagasa--tl {
-  width: 300px;
-  height: 300px;
-  left: -150px;
-  top: 50px;
+  width: 240px;
+  height: 240px;
+  left: -120px;
+  top: 115px;
 }
 
-/* 傘の中心 (250, 340)、傘の直径 250 → 画像幅 278 */
 .card__wagasa--c {
-  width: 278px;
-  height: 278px;
-  left: 111px;
-  top: 201px;
+  width: 240px;
+  height: 240px;
+  left: 130px;
+  top: 225px;
   opacity: calc(0.55 * var(--art-strength));
 }
 
-/* 傘の中心 (500, 440)、傘の直径 270 → 画像幅 300（フッターの文字にかからない位置） */
 .card__wagasa--br {
-  width: 300px;
-  height: 300px;
-  left: 350px;
-  top: 290px;
+  width: 240px;
+  height: 240px;
+  left: 380px;
+  top: 335px;
 }
 
 /* 雲と花（自作の SVG 1枚）。線の形だけを取り出し、文字色（--ink）で塗る。座標はカードと1対1 */
