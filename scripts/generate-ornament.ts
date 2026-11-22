@@ -254,10 +254,26 @@ const LEFT_FLOWERS: FlowerSpec[] = [
 
 // ---------------------------------------------------------------- 組み立て
 
+/**
+ * 群ごとの縮尺：上の座標で組んだ群（霞＋花）を、画面の端に接する基準点を中心に一様に縮める。
+ * 線の太さ・切り抜きの余白も同じ比率で縮む（同じ絵をそのまま小さくした見え方になる）。
+ * 線画と切り抜き（mask の外形）に同じ変換を掛けるので、重なりの隠れ方は変わらない。
+ */
+const SCALE = 0.78;
+const RIGHT_ANCHOR = [W, 104] as const; // 右上の群：右端・上端を基準に縮める
+const LEFT_ANCHOR = [0, 565] as const; // 左下の群：左端・下端を基準に縮める
+
+function scaled([ax, ay]: readonly [number, number], its: Item[]): Item[] {
+  const tf = `translate(${f(ax * (1 - SCALE))} ${f(ay * (1 - SCALE))}) scale(${SCALE})`;
+  const wrap = (s: string) => `<g transform="${tf}">${s}</g>`;
+  return its.map((it) => ({ draw: wrap(it.draw), sil: wrap(it.sil) }));
+}
+
 const items: Item[] = [
-  cloudItem(RIGHT_CLOUD),
-  cloudItem(LEFT_CLOUD),
-  ...[...RIGHT_FLOWERS, ...LEFT_FLOWERS].flatMap(flowerItems),
+  ...scaled(RIGHT_ANCHOR, [cloudItem(RIGHT_CLOUD)]),
+  ...scaled(LEFT_ANCHOR, [cloudItem(LEFT_CLOUD)]),
+  ...scaled(RIGHT_ANCHOR, RIGHT_FLOWERS.flatMap(flowerItems)),
+  ...scaled(LEFT_ANCHOR, LEFT_FLOWERS.flatMap(flowerItems)),
 ];
 
 // 要素を1つ足すたびに、それまでの全体をその要素の外形で切り抜く（入れ子の mask）
