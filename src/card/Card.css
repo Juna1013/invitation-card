@@ -140,27 +140,12 @@
   left: 0;
   right: 0;
   bottom: 0;
-  padding: 16px 26px 62px; /* 下の 60px は柵の帯 */
+  padding: 22px 26px 28px;
   background: var(--footer-bg);
   border-top: 1px solid rgba(var(--ink), 0.14);
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 14px 16px;
-}
-
-/* 柵：フッターの下（カードの最下部）に立てる。傘と重ならない。SVG の線の形だけを文字色で塗る */
-.card__fence {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 60px;
-  background: rgb(var(--ink));
-  opacity: calc(0.6 * var(--art-strength));
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 100%;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
+  gap: 20px 16px;
 }
 
 .field__value {

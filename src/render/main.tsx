@@ -18,8 +18,8 @@ window.renderCard = async ({ event, person, color }) => {
   const { tokens, minContrast } = deriveTheme(color);
   flushSync(() => root.render(<Card event={event} person={person} tokens={tokens} />));
   await document.fonts.ready;
-  // 和傘・柵・雲と花の SVG（CSS の mask で使う）の読込完了を待つ
-  const urls = [...document.querySelectorAll<HTMLElement>('.card__wagasa, .card__fence, .card__ornament')]
+  // 和傘・雲と花の SVG（CSS の mask で使う）の読込完了を待つ
+  const urls = [...document.querySelectorAll<HTMLElement>('.card__wagasa, .card__ornament')]
     .map((el) => el.style.maskImage.match(/url\("?(.+?)"?\)/)?.[1])
     .filter((u): u is string => !!u);
   await Promise.all(
