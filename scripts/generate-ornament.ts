@@ -79,8 +79,8 @@ function cloudPath({ tiers, necks, t, gap, neck }: Cloud): string {
 function cloudItem(c: Cloud): Item {
   const d = cloudPath(c);
   return {
-    draw: `<path d="${d}" stroke-width="2.5" stroke-opacity="0.78"/>`,
-    sil: `<path d="${d}" stroke="#000" stroke-width="5"/>`,
+    draw: `<path d="${d}" stroke-width="1.45" stroke-opacity="0.9"/>`,
+    sil: `<path d="${d}" stroke="#000" stroke-width="4"/>`,
   };
 }
 
