@@ -11,7 +11,7 @@ import './Card.css';
 export type EventInfo = {
   title: string;
   subtitle: string;
-  date: string; // "2027-01-11"
+  date: string; // "2027-01-10"
   startTime: string; // "17:00"
   endTime: string; // "19:00"
   venue: string; // 会場名

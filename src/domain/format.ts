@@ -1,4 +1,4 @@
-/** "2027-01-11" → "2027.01.11" */
+/** "2027-01-10" → "2027.01.10" */
 export function formatDateDotted(s: string): string {
   const m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
   if (!m) throw new Error(`日付の形式が不正です（YYYY-MM-DD）: ${s}`);

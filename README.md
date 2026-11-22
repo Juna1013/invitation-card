@@ -47,7 +47,7 @@ npm run sample
 ```yaml
 event:
   title: 勝田一中 同窓会
-  date: "2027-01-11"
+  date: "2027-01-10"
   venue: ホテルクリスタルパレス
   map_url: https://www.google.com/maps/search/?api=1&query=...
 ```
