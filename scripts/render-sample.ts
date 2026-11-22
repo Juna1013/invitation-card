@@ -9,32 +9,14 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 import { createServer } from 'vite';
-import type { EventInfo } from '../src/card/Card';
+import { loadConfig } from '../src/domain/config';
 import { formatNo } from '../src/domain/format';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const outDir = resolve(root, 'samples/cards');
 
-const event: EventInfo = {
-  school: '○○中学校',
-  title: '成人式 同窓会',
-  year: 2027,
-  startsAt: '2027-01-11 18:00',
-  fee: '5,000円',
-};
-
-// クラスごとの配色（設計書 §9）。教職員は「クラス」欄に「教職員」と入る想定
-const classColors: Record<string, string> = {
-  '3年1組': '白',
-  '3年2組': '黄',
-  '3年3組': '緑',
-  '3年4組': '朱',
-  '3年5組': '橙',
-  '3年6組': '青',
-  '3年7組': '紫',
-  '3年8組': 'ピンク',
-  教職員: '黒',
-};
+// 文言・クラスごとの配色（設計書 §9）は card.yaml で管理する。教職員は「クラス」欄に「教職員」と入る想定
+const { event, labels, classColors } = await loadConfig(resolve(root, 'card.yaml'));
 
 // 簡易パース（サンプル名簿はカンマを含まない前提）。通し番号は行順に 1 から
 const text = (await readFile(resolve(root, 'samples/roster.sample.csv'), 'utf8')).replace(/^﻿/, '');
@@ -69,7 +51,7 @@ try {
 
   for (const person of targets) {
     const color = classColors[person.className];
-    const { minContrast } = await page.evaluate((args) => window.renderCard(args), { event, person, color });
+    const { minContrast } = await page.evaluate((args) => window.renderCard(args), { event, labels, person, color });
     const file = resolve(outDir, `${formatNo(person.no)}_${person.className}_${person.name.replace(/\s|　/g, '')}.png`);
     await page.locator('.sheet').screenshot({ path: file, omitBackground: true, type: 'png' });
     console.log(`${file.replace(root + '/', '')}  (${color}, contrast ${minContrast.toFixed(1)})`);
