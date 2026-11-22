@@ -8,3 +8,6 @@ roster.*.csv
 event.toml
 # 公開用の個別カード（中間生成物。公開するのは samples/public/overview.png のみ）
 samples/public/cards/
+samples/public/pdf/
+# PDF 版のプレビュー PNG（一覧画像の入力。中間生成物）
+samples/pdf/*.png
