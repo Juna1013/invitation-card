@@ -1,5 +1,5 @@
 /**
- * サンプル PNG 生成（サンプル名簿から各クラス1人＋長い氏名の1人）。
+ * サンプル PNG 生成（サンプル名簿から各クラス1人。氏名はすべて「〇〇 〇〇」の伏字）。
  * 実行: npm run sample  →  samples/cards/ に出力
  *
  * 本番の生成コマンド（設定ファイル・検証・書き戻し）は別途。ここは見た目の確認用。
@@ -29,10 +29,9 @@ const people = text
     return { name: name.trim(), className: className.trim(), no: i + 1 };
   });
 
-// 各クラスの先頭1人 ＋ 長い氏名の1人
-const firstOfClass = Object.keys(classColors).map((c) => people.find((p) => p.className === c)!);
-const longName = people.reduce((a, b) => (b.name.length > a.name.length ? b : a));
-const targets = [...new Set([...firstOfClass, longName])];
+// サンプル画像には氏名を出さず、氏名の長さにかかわらず「〇〇 〇〇」にする。各クラスの先頭1人を対象にする
+const MASKED_NAME = '〇〇 〇〇';
+const targets = Object.keys(classColors).map((c) => ({ ...people.find((p) => p.className === c)!, name: MASKED_NAME }));
 
 await mkdir(outDir, { recursive: true });
 
