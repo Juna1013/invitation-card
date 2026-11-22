@@ -1,5 +1,5 @@
 import type { CSSProperties } from 'react';
-import { formatDateTime, formatNo } from '../domain/format';
+import { formatDateDotted, formatNo, formatTime } from '../domain/format';
 import type { ThemeTokens } from '../domain/theme';
 import asanohaUrl from '../assets/wagasa/wagasa-asanoha.svg';
 import seigaihaUrl from '../assets/wagasa/wagasa-seigaiha.svg';
@@ -9,11 +9,11 @@ import './Card.css';
 
 /** 全カード共通の情報 */
 export type EventInfo = {
-  school: string;
   title: string;
-  year: number;
-  startsAt: string; // "2027-01-11 18:00"
-  fee?: string;
+  subtitle: string;
+  date: string; // "2027-01-11"
+  startTime: string; // "17:00"
+  endTime: string; // "19:00"
 };
 
 /** カードに表示する項目名と敬称 */
@@ -22,7 +22,6 @@ export type CardLabels = {
   recipient: string;
   datetime: string;
   className: string;
-  fee: string;
   honorific: string;
 };
 
@@ -52,13 +51,26 @@ const units = (s: string) => [...s].reduce((sum, ch) => sum + (/[ 　]/.test(ch)
 const fitSize = (s: string, maxWidth: number, max: number, min: number) =>
   Math.max(min, Math.min(max, Math.floor(maxWidth / units(s))));
 
-function Field({ label, value, right, size }: { label: string; value: string; right?: boolean; size?: number }) {
+type FieldProps = {
+  label: string;
+  /** 配列のときは1要素を1行として、複数行で表示する */
+  value: string | string[];
+  right?: boolean;
+  /** 縦に2行分の高さを使う */
+  tall?: boolean;
+  size?: number;
+};
+
+function Field({ label, value, right, tall, size }: FieldProps) {
+  const className = ['field', right && 'field--right', tall && 'field--tall'].filter(Boolean).join(' ');
   return (
-    <div className={right ? 'field field--right' : 'field'}>
+    <div className={className}>
       <div className="field__label">{label}</div>
-      <div className="field__value" style={size ? { fontSize: size } : undefined}>
-        {value}
-      </div>
+      {(Array.isArray(value) ? value : [value]).map((line, i) => (
+        <div key={i} className="field__value" style={size ? { fontSize: size } : undefined}>
+          {line}
+        </div>
+      ))}
     </div>
   );
 }
@@ -84,9 +96,7 @@ export function Card({ event, labels, person, tokens }: CardProps) {
             <div className="card__title" style={{ fontSize: fitSize(event.title, 290, 24, 15) }}>
               {event.title}
             </div>
-            <div className="card__school">
-              {event.year}　{event.school}
-            </div>
+            <div className="card__subtitle">{event.subtitle}</div>
           </div>
           <div className="card__guest">
             <div className="label">{labels.guestNo}</div>
@@ -96,9 +106,13 @@ export function Card({ event, labels, person, tokens }: CardProps) {
 
         <footer className="card__footer">
           <Field label={labels.recipient} value={recipient} size={fitSize(recipient, 230, RECIPIENT_SIZE, 13)} />
-          <Field label={labels.datetime} value={formatDateTime(event.startsAt)} right />
+          <Field
+            label={labels.datetime}
+            value={[formatDateDotted(event.date), `${formatTime(event.startTime)} - ${formatTime(event.endTime)}`]}
+            right
+            tall
+          />
           <Field label={labels.className} value={person.className} />
-          {event.fee && <Field label={labels.fee} value={event.fee} right />}
         </footer>
       </div>
     </div>

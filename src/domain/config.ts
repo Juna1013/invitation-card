@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { parse } from 'yaml';
 import type { CardLabels, EventInfo } from '../card/Card';
+import { formatDateDotted, formatTime } from './format';
 import { resolveColor } from './theme';
 
 /** card.yaml の内容（検証済み） */
@@ -15,7 +16,6 @@ const LABEL_KEYS = {
   recipient: 'recipient',
   datetime: 'datetime',
   class: 'className',
-  fee: 'fee',
   honorific: 'honorific',
 } as const satisfies Record<string, keyof CardLabels>;
 
@@ -45,12 +45,22 @@ export function parseConfig(source: string): CardConfig {
 
   const ev = isObject(raw.event) ? raw.event : {};
   if (!isObject(raw.event)) errors.push('event を指定してください');
-  const school = collect(() => requireString(ev, 'school', 'event'), '');
   const title = collect(() => requireString(ev, 'title', 'event'), '');
-  const startsAt = collect(() => requireString(ev, 'starts_at', 'event'), '');
-  const year = ev.year;
-  if (typeof year !== 'number' || !Number.isInteger(year)) errors.push('event.year は整数で指定してください');
-  const fee = typeof ev.fee === 'string' && ev.fee.trim() !== '' ? ev.fee : undefined;
+  const subtitle = collect(() => requireString(ev, 'subtitle', 'event'), '');
+  // 日付・時刻は書式まで検証し、不備には項目名を付けて報告する
+  const dateTime = (key: string, check: (v: string) => unknown) =>
+    collect(() => {
+      const v = requireString(ev, key, 'event');
+      try {
+        check(v);
+      } catch (e) {
+        throw new Error(`event.${key}: ${(e as Error).message}`);
+      }
+      return v;
+    }, '');
+  const date = dateTime('date', formatDateDotted);
+  const startTime = dateTime('start_time', formatTime);
+  const endTime = dateTime('end_time', formatTime);
 
   const lb = isObject(raw.labels) ? raw.labels : {};
   if (!isObject(raw.labels)) errors.push('labels を指定してください');
@@ -74,7 +84,7 @@ export function parseConfig(source: string): CardConfig {
   if (errors.length > 0) throw new Error(`設定ファイルの不備:\n${errors.map((e) => `  - ${e}`).join('\n')}`);
 
   return {
-    event: { school, title, year: year as number, startsAt, ...(fee ? { fee } : {}) },
+    event: { title, subtitle, date, startTime, endTime },
     labels,
     classColors,
   };
