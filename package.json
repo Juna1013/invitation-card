@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "sample": "tsx scripts/render-sample.ts",
-    "fence": "tsx scripts/generate-fence.ts"
+    "fence": "tsx scripts/generate-fence.ts",
+    "ornament": "tsx scripts/generate-ornament.ts"
   },
   "dependencies": {
     "@fontsource/ibm-plex-mono": "^5.3.0",
