@@ -54,12 +54,6 @@ export function Card({ event, person, tokens, qrText }: CardProps) {
   return (
     <div className="sheet" style={tokens as CSSProperties}>
       <div className="card">
-        <div className="card__art" aria-hidden>
-          <div className="card__rays" />
-          <div className="card__sun" />
-          <div className="card__shade" />
-        </div>
-
         <header className="card__header">
           <div>
             <div className="card__title" style={{ fontSize: fitSize(event.title, 290, 24, 15) }}>
@@ -79,12 +73,12 @@ export function Card({ event, person, tokens, qrText }: CardProps) {
           <Qr text={qrText} />
         </div>
 
-        <div className="card__info">
+        <footer className="card__footer">
           <Field label="宛名" value={recipient} size={fitSize(recipient, 230, 19, 13)} />
           <Field label="日時" value={formatDateTime(event.startsAt)} right />
           <Field label="クラス" value={person.className} />
           {event.fee && <Field label="会費" value={event.fee} right />}
-        </div>
+        </footer>
       </div>
     </div>
   );

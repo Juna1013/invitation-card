@@ -34,7 +34,6 @@ export const contrast = (a: string, b: string) => {
   const [hi, lo] = [luminance(a), luminance(b)].sort((p, q) => q - p);
   return (hi + 0.05) / (lo + 0.05);
 };
-const alpha = (hex: string, a: number) => `rgba(${toRgb(hex).join(',')},${a})`;
 
 /** プリセット名 or #rrggbb を色コードに解決する */
 export function resolveColor(nameOrHex: string): string {
@@ -50,26 +49,17 @@ const TARGET_CONTRAST = 4.8;
 
 /**
  * 配色1色から、カードに注入する CSS 変数を導出する。
- * カードは常に白文字。背景の上端（文字が載る明るい側）が TARGET_CONTRAST を満たすまで暗くする。
+ * カードは常に白文字の無地背景。白文字が TARGET_CONTRAST を満たす最小限の暗さまで配色を暗くする。
+ * （フッターは半透明の黒を重ねるので、背景より暗くなり、コントラストはさらに上がる）
  */
 export function deriveTheme(color: string): { tokens: ThemeTokens; minContrast: number } {
-  let top = color;
+  let bg = color;
   for (let t = 0.1; t <= 0.8; t += 0.02) {
-    top = mix(color, '#000000', t);
-    if (contrast('#ffffff', top) >= TARGET_CONTRAST) break;
+    bg = mix(color, '#000000', t);
+    if (contrast('#ffffff', bg) >= TARGET_CONTRAST) break;
   }
-  const bottom = mix(top, '#000000', 0.5);
-  const accent = mix(color, '#ffffff', 0.35); // 太陽・アイコン円
-  const iconFg = contrast('#111111', accent) > contrast('#ffffff', accent) ? '#111111' : '#ffffff';
   return {
-    minContrast: Math.min(contrast('#ffffff', top), contrast('#ffffff', bottom)),
-    tokens: {
-      '--card-top': top,
-      '--card-bottom': bottom,
-      '--card-accent': accent,
-      '--card-glow': alpha(accent, 0.45),
-      '--icon-bg': accent,
-      '--icon-fg': iconFg,
-    },
+    minContrast: contrast('#ffffff', bg),
+    tokens: { '--card-bg': bg },
   };
 }

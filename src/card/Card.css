@@ -6,27 +6,22 @@
 
 /*
   固定デザイン（Apple Wallet のイベントパス風）。
-  色は --card-* / --icon-* 変数（theme.ts が導出）だけを参照する。文字は常に白。
+  背景は無地（--card-bg）。文字は常に白。色は theme.ts が導出した CSS 変数だけを参照する。
   サイズ 500x740（ハガキ比率）。出力は 2.4 倍の 1200x1776 px
 */
 .sheet {
-  --sun-y: 270px;
   --mono: 'IBM Plex Mono', 'Noto Sans JP', ui-monospace, monospace;
   width: 500px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
   color: #fff;
   font-family: 'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', sans-serif;
 }
 
-/* ---- パス本体 ---- */
 .card {
   position: relative;
   height: 740px;
   border-radius: 26px;
   overflow: hidden;
-  background: linear-gradient(180deg, var(--card-top), var(--card-bottom));
+  background: var(--card-bg);
 }
 
 /* 細いハイライト線 */
@@ -37,45 +32,6 @@
   border-radius: inherit;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
   pointer-events: none;
-}
-
-/* 背景アート：朝日（新しい門出）をモチーフにした抽象図形 */
-.card__art {
-  position: absolute;
-  inset: 0;
-}
-
-.card__rays {
-  position: absolute;
-  inset: 0;
-  background: repeating-conic-gradient(from 0deg at 50% var(--sun-y), rgba(255, 255, 255, 0.1) 0 3deg, transparent 3deg 10deg);
-  -webkit-mask-image: radial-gradient(circle at 50% var(--sun-y), #000 0, rgba(0, 0, 0, 0.6) 180px, transparent 430px);
-  mask-image: radial-gradient(circle at 50% var(--sun-y), #000 0, rgba(0, 0, 0, 0.6) 180px, transparent 430px);
-}
-
-.card__sun {
-  position: absolute;
-  left: 50%;
-  top: var(--sun-y);
-  width: 200px;
-  height: 200px;
-  margin: -100px 0 0 -100px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 38% 32%, rgba(255, 255, 255, 0.6), var(--card-accent) 55%, var(--card-glow) 100%);
-  box-shadow:
-    0 0 0 22px rgba(255, 255, 255, 0.07),
-    0 0 0 50px rgba(255, 255, 255, 0.05),
-    0 0 90px 30px var(--card-glow);
-}
-
-/* 下部は暗くして、文字を読みやすくする */
-.card__shade {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 300px;
-  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.4));
 }
 
 /* ヘッダー：左=ロゴ(タイトル) / 右=GUEST NO. */
@@ -120,19 +76,18 @@
   letter-spacing: 0.06em;
 }
 
-/* QR：白い角丸の台座 */
+/* QR：白い角丸の台座。ヘッダーとフッターの間の中央に置く */
 .card__qr {
   position: absolute;
   left: 50%;
-  top: 400px;
-  width: 140px;
-  height: 140px;
-  margin-left: -70px;
-  padding: 10px;
+  top: 252px;
+  width: 190px;
+  height: 190px;
+  margin-left: -95px;
+  padding: 14px;
   box-sizing: border-box;
   background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  border-radius: 20px;
 }
 
 .card__qr svg {
@@ -141,12 +96,15 @@
   height: 100%;
 }
 
-/* 下部の項目：ラベル(等幅・薄)＋値 */
-.card__info {
+/* フッター：半透明の暗いパネル。ラベル(等幅・薄)＋値 */
+.card__footer {
   position: absolute;
-  left: 26px;
-  right: 26px;
-  bottom: 28px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 22px 26px 28px;
+  background: rgba(0, 0, 0, 0.3);
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 20px 16px;
