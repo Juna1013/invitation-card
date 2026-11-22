@@ -1,0 +1,158 @@
+@import '@fontsource/noto-sans-jp/400.css';
+@import '@fontsource/noto-sans-jp/500.css';
+@import '@fontsource/noto-sans-jp/700.css';
+
+/*
+  固定デザイン。色は直接書かず、すべて --card-* 変数（theme.ts が導出）を参照する。
+  サイズ 500x740（ハガキ 100x148mm の比率）。
+*/
+.card {
+  --notch-y: 395px;
+  --notch-r: 14px;
+
+  position: relative;
+  width: 500px;
+  height: 740px;
+  box-sizing: border-box;
+  border-radius: 28px;
+  overflow: hidden;
+  color: var(--card-fg);
+  background: linear-gradient(135deg, var(--card-from), var(--card-to));
+  font-family: 'Noto Sans JP', 'Hiragino Sans', 'Yu Gothic', sans-serif;
+  font-feature-settings: 'palt' 0;
+
+  /* 切り取り線の両端を丸く抜く（背景の透過と両立させるため mask を使う） */
+  -webkit-mask:
+    radial-gradient(circle var(--notch-r) at 0 var(--notch-y), #0000 97%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle var(--notch-r) at 100% var(--notch-y), #0000 97%, #000) right / 51% 100% no-repeat;
+  mask:
+    radial-gradient(circle var(--notch-r) at 0 var(--notch-y), #0000 97%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle var(--notch-r) at 100% var(--notch-y), #0000 97%, #000) right / 51% 100% no-repeat;
+}
+
+/* 細いハイライト線 */
+.card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.35);
+  pointer-events: none;
+}
+
+.card__header {
+  position: absolute;
+  top: 36px;
+  left: 35px;
+  right: 35px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  color: var(--card-fg-80);
+}
+
+/* ストリップ：同心円の幾何学パターン＋タイトル */
+.card__strip {
+  position: absolute;
+  top: 70px;
+  left: 35px;
+  right: 35px;
+  height: 170px;
+  border-radius: 18px;
+  overflow: hidden;
+  background:
+    repeating-radial-gradient(circle at 88% 12%, transparent 0 22px, var(--card-fg-16) 22px 23.5px),
+    var(--card-fg-10);
+}
+
+.card__title {
+  position: absolute;
+  left: 20px;
+  bottom: 22px;
+  font-weight: 700;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.card__who {
+  position: absolute;
+  top: 262px;
+  left: 35px;
+  right: 35px;
+}
+
+.card__school {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--card-fg-80);
+}
+
+.card__recipient {
+  margin-top: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* 切り取り線 */
+.card__perf {
+  position: absolute;
+  top: var(--notch-y);
+  left: 24px;
+  right: 24px;
+  border-top: 2px dashed var(--card-fg-35);
+}
+
+.card__info {
+  position: absolute;
+  top: 430px;
+  left: 35px;
+  right: 35px;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px 20px;
+}
+
+.card__field dt {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--card-fg-65);
+}
+
+.card__field dd {
+  margin: 4px 0 0;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.card__message {
+  position: absolute;
+  top: 600px;
+  left: 35px;
+  right: 35px;
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--card-fg-80);
+  text-wrap: pretty;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card__no {
+  position: absolute;
+  right: 35px;
+  bottom: 28px;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  font-variant-numeric: tabular-nums;
+  color: var(--card-fg-80);
+}
