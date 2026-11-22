@@ -34,7 +34,10 @@
   pointer-events: none;
 }
 
-/* 背景の飾り：和傘（カード中央）と、画面端から入る霞。線画なので白の透過で重ねる */
+/*
+  背景の飾り：和傘3つ（左上・右下は半分だけ顔を出し、中央に丸ごと1つ）と、画面端から入る霞。
+  線画なので白の透過で重ねる。和傘の SVG は傘の半径が幅の 0.9 倍（viewBox 400 に対し半径 180）。
+*/
 .card__art {
   position: absolute;
   inset: 0;
@@ -42,12 +45,32 @@
 
 .card__wagasa {
   position: absolute;
-  left: 50%;
-  top: 347px; /* ヘッダーとフッターの間の中央 */
-  width: 440px;
-  height: 440px;
-  margin: -220px 0 0 -220px;
-  opacity: 0.5;
+  opacity: 0.45;
+}
+
+/* 傘の中心 (0, 200)、傘の直径 270 → 画像幅 300（ヘッダーの文字にかからない位置） */
+.card__wagasa--tl {
+  width: 300px;
+  height: 300px;
+  left: -150px;
+  top: 50px;
+}
+
+/* 傘の中心 (250, 340)、傘の直径 250 → 画像幅 278 */
+.card__wagasa--c {
+  width: 278px;
+  height: 278px;
+  left: 111px;
+  top: 201px;
+  opacity: 0.55;
+}
+
+/* 傘の中心 (500, 500)、傘の直径 270 → 画像幅 300（フッターの文字にほぼかからない位置） */
+.card__wagasa--br {
+  width: 300px;
+  height: 300px;
+  left: 350px;
+  top: 350px;
 }
 
 .card__kasumi {

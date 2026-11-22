@@ -1,7 +1,9 @@
 import type { CSSProperties } from 'react';
 import { formatDateTime, formatNo } from '../domain/format';
 import type { ThemeTokens } from '../domain/theme';
-import wagasaUrl from '../assets/wagasa/wagasa-uzu.svg';
+import asanohaUrl from '../assets/wagasa/wagasa-asanoha.svg';
+import seigaihaUrl from '../assets/wagasa/wagasa-seigaiha.svg';
+import uzuUrl from '../assets/wagasa/wagasa-uzu.svg';
 import { Kasumi } from './parts/Kasumi';
 import './Card.css';
 
@@ -54,7 +56,9 @@ export function Card({ event, person, tokens }: CardProps) {
     <div className="sheet" style={tokens as CSSProperties}>
       <div className="card">
         <div className="card__art" aria-hidden>
-          <img className="card__wagasa" src={wagasaUrl} alt="" />
+          <img className="card__wagasa card__wagasa--tl" src={asanohaUrl} alt="" />
+          <img className="card__wagasa card__wagasa--c" src={uzuUrl} alt="" />
+          <img className="card__wagasa card__wagasa--br" src={seigaihaUrl} alt="" />
           <Kasumi id="kasumi-r" className="card__kasumi card__kasumi--r" />
           <Kasumi id="kasumi-l" flip className="card__kasumi card__kasumi--l" />
         </div>
