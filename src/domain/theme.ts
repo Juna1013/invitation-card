@@ -1,14 +1,14 @@
 /** 配色プリセット（設定ファイルからは名前で参照する） */
 export const PRESETS: Record<string, string> = {
-  白: '#ffffff',
-  黄: '#f2c744',
-  緑: '#4caf63',
-  朱: '#df4a2c',
-  橙: '#f08a24',
-  青: '#2f6fd0',
-  紫: '#7b4fc1',
-  ピンク: '#f08fb0',
-  黒: '#1c1c1e',
+  白練: '#fcfaf2',
+  鬱金色: '#efbb24',
+  常磐緑: '#007b43',
+  茜色: '#b7282e',
+  蜜柑色: '#f08300',
+  藍色: '#165e83',
+  江戸紫: '#745399',
+  撫子色: '#dc9fb4',
+  鉄黒: '#281a14',
 };
 
 type RGB = [number, number, number];
@@ -44,7 +44,7 @@ export function resolveColor(nameOrHex: string): string {
 
 /** 文字・線画の色を白にしないプリセット（暗い地色のものだけ） */
 const PRESET_INK: Record<string, string> = {
-  黒: '#d4af37', // 金
+  鉄黒: '#d4af37', // 金
 };
 
 export type ThemeTokens = Record<`--${string}`, string>;
@@ -57,8 +57,8 @@ const DARK_INK = '#111111';
 
 /**
  * 配色（プリセット名 or #rrggbb）から、カードに注入する CSS 変数を導出する。
- *  - 明るい色（白・黄・緑・橙・ピンク）: 地色はそのまま、文字と線画は濃色
- *  - 暗い色（朱・青・紫・黒）: 文字と線画は白（黒は金）。その色が TARGET_CONTRAST を満たす最小限の暗さまで地色を暗くする
+ *  - 明るい色（白練・鬱金色・蜜柑色・撫子色）: 地色はそのまま、文字と線画は濃色
+ *  - 暗い色（常磐緑・茜色・藍色・江戸紫・鉄黒）: 文字と線画は白（鉄黒は金）。その色が TARGET_CONTRAST を満たす最小限の暗さまで地色を暗くする
  */
 export function deriveTheme(nameOrHex: string): { tokens: ThemeTokens; minContrast: number } {
   const color = resolveColor(nameOrHex);
