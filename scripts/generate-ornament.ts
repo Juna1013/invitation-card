@@ -1,14 +1,16 @@
 /**
- * 「雲と花」の飾り SVG を一から生成する → src/assets/ornament/cloud-flowers.svg
+ * 「霞と花」の飾り SVG を一から生成する → src/assets/ornament/cloud-flowers.svg
  *
- *   右上と左下の端から入る霞（すやり霞：先端がきれいに丸い、細長い横帯を段々にずらして重ねる）と、
- *   霞に添える花（梅・桜・菊・輪花）。すべて自作の幾何学図形。
+ *   右上と左下の端から入る霞（すやり霞：先端がきれいに丸い細長い横帯を、段々にずらして重ねる）と、
+ *   霞に寄り集まって咲く梅の線画（重ね梅・しべ梅・ねじ梅・小梅など）。すべて自作の幾何学図形。
  *   形の根拠: 霞は「工」「王」の字のように様式化された、横に広がる帯。13世紀以降、帯の先端を丸く、
  *   輪郭をくっきり描くようになった（すやり霞＝槍霞）。出典: JAANUS「kasumi」
  *   https://projects.mcah.columbia.edu/jaanus/record/kasumi
  *
  * 座標はカード（500x740 px）と 1:1。色は付けない（カード側で CSS の mask に使い、文字色 --ink で塗る）。
- * 重なる部分は SVG の mask で切り抜く（下の段の帯が上の段の帯を覆い、霞の線は花の中に透けない。後から描く花が手前になる）。
+ * 重なりは SVG の mask で切り抜く：要素を奥から順に積み、要素を1つ足すたびに、それまでの全体を
+ * その要素の外形（シルエット）で切り抜く（後に描いたものが手前になり、奥の線は透けない）。
+ * 乱数は使わない（毎回同じ SVG になる）。
  * 実行: npm run ornament
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
@@ -19,191 +21,264 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const W = 500;
 const H = 740;
 
-const f = (n: number) => n.toFixed(2);
+const f = (n: number) => (Math.round(n * 100) / 100).toString();
 const rad = (d: number) => (d * Math.PI) / 180;
 const polar = (r: number, deg: number) => [Math.cos(rad(deg)) * r, Math.sin(rad(deg)) * r] as const;
 const seq = (n: number) => Array.from({ length: n }, (_, i) => i);
+const pt = (r: number, deg: number) => polar(r, deg).map(f).join(' ');
+
+/** 奥から順に積む要素。draw = 見える線、sil = 手前に来たときに奥を隠す外形（黒で塗る） */
+type Item = { draw: string; sil: string };
 
 // ---------------------------------------------------------------- 霞
 
-type Band = { y: number; end: number; r: number };
-
 /**
- * 画面の端（edge）から入る霞の1段（細長い横帯）。端から伸びた2本の水平線が、先端（end）で半円につながる。
- * close=true なら、端まで閉じた塗り用の形（下の段が上の段を覆う切り抜きに使う）。
+ * 霞雲：細長い横帯（先端が丸い）を3〜4段、左右交互にずらして積み、上下の段を細いくびれ（凹んだ丸い
+ * つなぎ）で結んだ、ひと続きの閉じた輪郭（工・王の字のような形）。内側の線は描かない。
+ * 帯の端が画面の外（x<0 / x>W）にあれば、その端は丸めずに画面外で閉じる（画面の端から入ってくる）。
  */
-function bandShape(edge: 'left' | 'right', { y, end, r }: Band, close = false): string {
-  const far = edge === 'right' ? W + 12 : -12; // 画面の外まで伸ばす
-  const cap = end + (edge === 'right' ? r : -r); // 半円の付け根
-  const sweep = edge === 'right' ? 0 : 1;
-  return `M${f(far)} ${f(y - r)} H${f(cap)} A${r} ${r} 0 0 ${sweep} ${f(cap)} ${f(y + r)} H${f(far)}${close ? 'Z' : ''}`;
+type Tier = { top: number; a: number; b: number }; // 帯の上端 y と、左端 a・右端 b
+type Cloud = { tiers: Tier[]; necks: number[]; t: number; gap: number; neck: number };
+
+function cloudPath({ tiers, necks, t, gap, neck }: Cloud): string {
+  const r = t / 2;
+  const rf = gap / 2; // くびれの凹んだ丸み（上下の帯の縁に接する円）
+  const nh = neck / 2;
+  const off = (x: number) => x < 0 || x > W;
+  const bot = (i: number) => tiers[i].top + t;
+  const n = tiers.length;
+  const t0 = tiers[0];
+  let d = `M${f(off(t0.a) ? t0.a : t0.a + r)} ${f(t0.top)}`;
+  const rightEnd = (i: number) => {
+    const { b, top } = tiers[i];
+    d += off(b) ? ` H${f(b)} V${f(bot(i))}` : ` H${f(b - r)} A${f(r)} ${f(r)} 0 0 1 ${f(b - r)} ${f(bot(i))}`;
+  };
+  const leftEnd = (i: number) => {
+    const { a, top } = tiers[i];
+    d += off(a) ? ` H${f(a)} V${f(top)}` : ` H${f(a + r)} A${f(r)} ${f(r)} 0 0 1 ${f(a + r)} ${f(top)}`;
+  };
+  // 右側を下へ
+  for (let i = 0; i < n; i++) {
+    rightEnd(i);
+    if (i < n - 1) {
+      const x = necks[i] + nh + rf;
+      d += ` H${f(x)} A${f(rf)} ${f(rf)} 0 0 0 ${f(x)} ${f(tiers[i + 1].top)}`;
+    }
+  }
+  // 左側を上へ
+  for (let i = n - 1; i >= 0; i--) {
+    leftEnd(i);
+    if (i > 0) {
+      const x = necks[i - 1] - nh - rf;
+      d += ` H${f(x)} A${f(rf)} ${f(rf)} 0 0 0 ${f(x)} ${f(bot(i - 1))}`;
+    }
+  }
+  return d + 'Z';
 }
 
-/** 帯の輪郭（外側）と、輪郭に平行な内側の細い線（輪郭から inset だけ内側） */
-function bandLines(edge: 'left' | 'right', b: Band): string {
-  const inset = 3.6;
-  const inner: Band = { y: b.y, end: b.end + (edge === 'right' ? inset : -inset), r: b.r - inset };
-  return `<path d="${bandShape(edge, b)}"/><path d="${bandShape(edge, inner)}" stroke-width="1.1"/>`;
+function cloudItem(c: Cloud): Item {
+  const d = cloudPath(c);
+  return {
+    draw: `<path d="${d}" stroke-width="2.5" stroke-opacity="0.78"/>`,
+    sil: `<path d="${d}" stroke="#000" stroke-width="5"/>`,
+  };
 }
 
-// ---------------------------------------------------------------- 花
+// ---------------------------------------------------------------- 花（梅）
 
-type Kind = 'ume' | 'sakura' | 'kiku' | 'rin';
+/** 花びらの中心までの距離 D と花びらの半径 P（どちらも花の半径 R に対する比） */
+const D = 0.5;
+const P = 0.5;
+
+/** 隣り合う花びら（円）の交点のうち外側の点までの距離（R に対する比） */
+const notch = (d: number, p: number) => d * Math.cos(rad(36)) + Math.sqrt(p * p - (d * Math.sin(rad(36))) ** 2);
+
+/** 5枚の丸い花びらを合わせた外形（花びら同士の内側の線は描かない、ひと筆の輪郭） */
+function umeOutline(R: number, d = D, p = P): string {
+  const t = notch(d, p) * R;
+  const pr = p * R;
+  // 花びら1枚の外側の弧が中心から見て何度か（180 度を超えれば large-arc）
+  const [cx, cy] = [d * R, 0];
+  const [qx, qy] = polar(t, 36);
+  const half = Math.atan2(qy - cy, qx - cx);
+  const large = 2 * (Math.PI - half) > Math.PI ? 1 : 0;
+  let path = `M${pt(t, -90 - 36)}`;
+  for (const i of seq(5)) path += ` A${f(pr)} ${f(pr)} 0 ${large} 1 ${pt(t, i * 72 - 90 + 36)}`;
+  return `<path d="${path}Z"/>`;
+}
+
+/** 花の外形（切り抜き用）：花びらの円をすべて塗る。線幅の分だけ少し太らせる */
+function umeSil(R: number, d = D, p = P): string {
+  return seq(5)
+    .map((i) => {
+      const [x, y] = polar(d * R, i * 72 - 90);
+      return `<circle cx="${f(x)}" cy="${f(y)}" r="${f(p * R + 1.6)}"/>`;
+    })
+    .join('') + `<circle r="${f(d * R)}"/>`;
+}
+
+/** 中心から花びらの切れ目へ伸びる線（重ね梅の手前の花） */
+const notchLines = (R: number, from = 0) =>
+  seq(5)
+    .map((i) => `<path d="M${pt(from * R, i * 72 - 54)} L${pt(notch(D, P) * R * 0.97, i * 72 - 54)}"/>`)
+    .join('');
+
+/** 中心の小さな円 */
+const pistil = (r: number) => `<circle r="${f(r)}"/>`;
+
+/** 放射状のしべ：中心の円から外へ細い線、先に小さな点。長短を交互に */
+function stamens(R: number, n = 16): string {
+  return seq(n)
+    .map((i) => {
+      const a = (i * 360) / n;
+      const len = i % 2 === 0 ? 0.47 : 0.38;
+      const [x, y] = polar(len * R, a);
+      return (
+        `<path d="M${pt(0.14 * R, a)} L${f(x)} ${f(y)}" stroke-width="1.05"/>` +
+        `<circle cx="${f(x)}" cy="${f(y)}" r="${f(Math.max(0.9, 0.035 * R))}" fill="#000" stroke="none"/>`
+      );
+    })
+    .join('');
+}
+
+/** ねじ梅の、中心から各花びらへ渦を巻くように伸びる曲線 */
+function swirls(R: number): string {
+  return seq(5)
+    .map((i) => {
+      const a = i * 72 - 90;
+      return `<path d="M${pt(0.15 * R, a - 20)} Q${pt(0.42 * R, a - 8)} ${pt(0.66 * R, a + 22)}"/>`;
+    })
+    .join('');
+}
+
+/** 花びらの付け根の小さなしずく形（小梅の模様） */
+function drops(R: number): string {
+  return seq(5)
+    .map((i) => {
+      const a = i * 72 - 90;
+      const [x, y] = polar(0.3 * R, a);
+      return `<ellipse cx="${f(x)}" cy="${f(y)}" rx="${f(Math.max(0.8, 0.045 * R))}" ry="${f(Math.max(1.5, 0.09 * R))}" transform="rotate(${f(a + 90)} ${f(x)} ${f(y)})" fill="#000" stroke="none"/>`;
+    })
+    .join('');
+}
+
+type Kind =
+  | 'kasane' // 重ね梅：奥にずらした花、手前に切れ目の線のある花
+  | 'kasaneShibe' // 重ね梅（手前にしべ）
+  | 'shibe' // しべ梅：外形＋中心の円＋放射状のしべ
+  | 'neji' // ねじ梅：中心の円から渦巻く線
+  | 'komon' // 小梅：外形としずく形
+  | 'ko'; // 小花：外形＋中心の円
 type FlowerSpec = { kind: Kind; x: number; y: number; r: number; rot?: number };
 
-/** 梅：丸い花びら5枚（外形＋内側の曲線）、中心の円とおしべの点 */
-function ume(r: number): string {
-  const parts = seq(5).map((i) => {
-    const dir = i * 72 - 90;
-    const [cx, cy] = polar(r * 0.56, dir);
-    const [ax, ay] = polar(r * 0.3, dir - 85);
-    const [bx, by] = polar(r * 0.3, dir + 85);
-    // 花びらの内側の曲線：花びらの中心から見て外側に膨らむ弧
-    const ex = cx + ax;
-    const ey = cy + ay;
-    const gx = cx + bx;
-    const gy = cy + by;
-    return (
-      `<circle cx="${f(cx)}" cy="${f(cy)}" r="${f(r * 0.47)}"/>` +
-      `<path d="M${f(ex)} ${f(ey)} A${f(r * 0.3)} ${f(r * 0.3)} 0 0 1 ${f(gx)} ${f(gy)}"/>`
-    );
-  });
-  const dots = seq(10).map((i) => {
-    const [x, y] = polar(r * 0.3, i * 36);
-    return `<circle cx="${f(x)}" cy="${f(y)}" r="${f(r * 0.03)}"/>`;
-  });
-  return parts.join('') + `<circle r="${f(r * 0.19)}"/>` + dots.join('');
-}
+const place = (fl: FlowerSpec, rot: number, body: string) =>
+  `<g transform="translate(${fl.x} ${fl.y}) rotate(${f(rot)})">${body}</g>`;
 
-/** 桜：先端に切れ込みのある花びら5枚（花びらごとに筋）、おしべの点 */
-function sakura(r: number): string {
-  const petal =
-    `M0 0 C${f(-0.52 * r)} ${f(-0.25 * r)} ${f(-0.58 * r)} ${f(-0.88 * r)} ${f(-0.2 * r)} ${f(-r)} ` +
-    `L0 ${f(-0.82 * r)} L${f(0.2 * r)} ${f(-r)} C${f(0.58 * r)} ${f(-0.88 * r)} ${f(0.52 * r)} ${f(-0.25 * r)} 0 0Z`;
-  const ps = seq(5).map(
-    (i) => `<g transform="rotate(${i * 72})"><path d="${petal}"/><path d="M0 ${f(-0.18 * r)} L0 ${f(-0.62 * r)}"/></g>`,
-  );
-  const dots = seq(10).map((i) => {
-    const [x, y] = polar(r * 0.3, i * 36 + 18);
-    return `<circle cx="${f(x)}" cy="${f(y)}" r="${f(r * 0.035)}"/>`;
+function flowerItems(fl: FlowerSpec): Item[] {
+  const R = fl.r;
+  const rot = fl.rot ?? 0;
+  const item = (r: number, body: string, dr = 0): Item => ({
+    draw: place(fl, rot + dr, body),
+    sil: place(fl, rot + dr, umeSil(r)),
   });
-  return ps.join('') + dots.join('');
+  switch (fl.kind) {
+    case 'kasane':
+      return [item(R, umeOutline(R), 36), item(R * 0.84, umeOutline(R * 0.84) + notchLines(R * 0.84))];
+    case 'kasaneShibe':
+      return [
+        item(R, umeOutline(R), 36),
+        item(R * 0.86, umeOutline(R * 0.86) + pistil(R * 0.1) + stamens(R * 0.86, 18)),
+      ];
+    case 'shibe':
+      return [item(R, umeOutline(R) + pistil(R * 0.1) + stamens(R, 14))];
+    case 'neji':
+      return [item(R, umeOutline(R) + pistil(R * 0.11) + swirls(R))];
+    case 'komon':
+      return [item(R, umeOutline(R) + drops(R))];
+    case 'ko':
+      return [item(R, umeOutline(R) + pistil(R * 0.16))];
+  }
 }
-
-/** 菊：細長い花びらを2重に並べた花 */
-function kiku(r: number): string {
-  const outer = seq(18).map(
-    (i) => `<ellipse cx="0" cy="${f(-r * 0.68)}" rx="${f(r * 0.09)}" ry="${f(r * 0.3)}" transform="rotate(${i * 20})"/>`,
-  );
-  const inner = seq(9).map(
-    (i) => `<ellipse cx="0" cy="${f(-r * 0.4)}" rx="${f(r * 0.08)}" ry="${f(r * 0.17)}" transform="rotate(${i * 40 + 20})"/>`,
-  );
-  return outer.join('') + inner.join('') + `<circle r="${f(r * 0.14)}"/>`;
-}
-
-/** 輪花：縁取りの小さな丸、二重の円、その間の放射線、中心のおしべの輪 */
-function rin(r: number): string {
-  const edge = seq(14).map((i) => {
-    const [x, y] = polar(r * 0.88, i * (360 / 14));
-    return `<circle cx="${f(x)}" cy="${f(y)}" r="${f(r * 0.13)}"/>`;
-  });
-  const rays = seq(30).map((i) => {
-    const [x1, y1] = polar(r * 0.38, i * 12);
-    const [x2, y2] = polar(r * 0.7, i * 12);
-    return `<line x1="${f(x1)}" y1="${f(y1)}" x2="${f(x2)}" y2="${f(y2)}"/>`;
-  });
-  const dots = seq(8).map((i) => {
-    const [x, y] = polar(r * 0.2, i * 45 + 22);
-    return `<circle cx="${f(x)}" cy="${f(y)}" r="${f(r * 0.03)}"/>`;
-  });
-  return edge.join('') + `<circle r="${f(r * 0.74)}"/><circle r="${f(r * 0.34)}"/>` + rays.join('') + dots.join('');
-}
-
-const drawFlower = (k: Kind, r: number) => ({ ume, sakura, kiku, rin })[k](r);
 
 // ---------------------------------------------------------------- 配置
 
-/** 帯は上から下へ。下の段が手前（上の段を覆う）。先端の位置をずらして、段々に見せる */
-const RIGHT_BANDS: Band[] = [
-  { y: 128, end: 430, r: 11 },
-  { y: 148, end: 388, r: 11 },
-  { y: 168, end: 412, r: 11 },
-  { y: 188, end: 366, r: 11 },
-  { y: 208, end: 398, r: 11 },
-  { y: 228, end: 352, r: 11 },
-];
-const LEFT_BANDS: Band[] = [
-  { y: 398, end: 70, r: 11 },
-  { y: 418, end: 112, r: 11 },
-  { y: 438, end: 88, r: 11 },
-  { y: 458, end: 132, r: 11 },
-  { y: 478, end: 98, r: 11 },
-  { y: 498, end: 142, r: 11 },
-  { y: 518, end: 108, r: 11 },
-];
+/** 右上：右の端から入る霞（1・3段目は画面外へ抜け、2・4段目は左右とも丸い頭） */
+const RIGHT_CLOUD: Cloud = {
+  t: 28,
+  gap: 11,
+  neck: 12,
+  tiers: [
+    { top: 104, a: 372, b: W + 20 },
+    { top: 143, a: 304, b: 458 },
+    { top: 182, a: 384, b: W + 20 },
+    { top: 221, a: 342, b: 448 },
+  ],
+  necks: [402, 428, 404],
+};
+/** 左下：左の端から入る霞（右上の霞を左右反転した段の並び） */
+const LEFT_CLOUD: Cloud = {
+  t: 28,
+  gap: 11,
+  neck: 12,
+  tiers: [
+    { top: 384, a: -20, b: 104 },
+    { top: 423, a: 26, b: 146 },
+    { top: 462, a: -20, b: 110 },
+    { top: 501, a: 40, b: 162 },
+  ],
+  necks: [70, 56, 80],
+};
 
 /** 花は先に書いたものが奥、後に書いたものが手前 */
-const FLOWERS: FlowerSpec[] = [
-  // 右の雲：下の段に添える
-  { kind: 'ume', x: 408, y: 246, r: 33, rot: 8 },
-  { kind: 'kiku', x: 466, y: 262, r: 26 },
-  { kind: 'sakura', x: 452, y: 208, r: 19, rot: 20 },
-  { kind: 'rin', x: 372, y: 214, r: 16 },
-  { kind: 'ume', x: 490, y: 224, r: 11, rot: 30 },
-  { kind: 'sakura', x: 436, y: 292, r: 10, rot: -10 },
-  // 左の雲：下の段に添える
-  { kind: 'ume', x: 100, y: 508, r: 33, rot: 14 },
-  { kind: 'rin', x: 44, y: 536, r: 25 },
-  { kind: 'sakura', x: 144, y: 468, r: 18, rot: 28 },
-  { kind: 'kiku', x: 24, y: 478, r: 15 },
-  { kind: 'ume', x: 138, y: 548, r: 10, rot: 20 },
-  { kind: 'sakura', x: 70, y: 468, r: 10, rot: -16 },
+const RIGHT_FLOWERS: FlowerSpec[] = [
+  { kind: 'komon', x: 494, y: 110, r: 13, rot: 10 },
+  { kind: 'kasane', x: 466, y: 150, r: 22, rot: -6 },
+  { kind: 'ko', x: 398, y: 190, r: 10, rot: 14 },
+  { kind: 'shibe', x: 486, y: 206, r: 21, rot: 4 },
+  { kind: 'ko', x: 452, y: 206, r: 9, rot: -20 },
+  { kind: 'kasaneShibe', x: 436, y: 250, r: 27, rot: 2 },
+  { kind: 'neji', x: 380, y: 266, r: 17, rot: 18 },
+  { kind: 'komon', x: 407, y: 287, r: 11, rot: -12 },
+  { kind: 'kasane', x: 484, y: 276, r: 19, rot: 24 },
+];
+const LEFT_FLOWERS: FlowerSpec[] = [
+  { kind: 'ko', x: 140, y: 448, r: 10, rot: 8 },
+  { kind: 'kasane', x: 36, y: 470, r: 23, rot: 12 },
+  { kind: 'shibe', x: 108, y: 496, r: 23, rot: -4 },
+  { kind: 'komon', x: 72, y: 492, r: 11, rot: 30 },
+  { kind: 'neji', x: 56, y: 529, r: 20, rot: -10 },
+  { kind: 'kasaneShibe', x: 144, y: 533, r: 20, rot: 20 },
+  { kind: 'komon', x: 14, y: 545, r: 12, rot: 0 },
+  { kind: 'ko', x: 101, y: 546, r: 10, rot: -16 },
 ];
 
 // ---------------------------------------------------------------- 組み立て
 
-const hole = (fl: FlowerSpec) => `<circle cx="${fl.x}" cy="${fl.y}" r="${f(fl.r * 1.03)}" fill="#000"/>`;
-const maskDef = (id: string, holes: string) =>
-  `<mask id="${id}" maskUnits="userSpaceOnUse" x="0" y="0" width="${W}" height="${H}"><rect width="${W}" height="${H}" fill="#fff"/>${holes}</mask>`;
-
-const allBands = [
-  ...RIGHT_BANDS.map((b) => ({ edge: 'right' as const, b })),
-  ...LEFT_BANDS.map((b) => ({ edge: 'left' as const, b })),
+const items: Item[] = [
+  cloudItem(RIGHT_CLOUD),
+  cloudItem(LEFT_CLOUD),
+  ...[...RIGHT_FLOWERS, ...LEFT_FLOWERS].flatMap(flowerItems),
 ];
-const flowerHoles = FLOWERS.map(hole).join('');
 
-// 帯ごとの mask：自分より下（手前）の帯と、すべての花で切り抜く
-const bandMasks = allBands.map(({ edge, b }, i) => {
-  const later = allBands
-    .slice(i + 1)
-    .filter((o) => o.edge === edge)
-    .map((o) => `<path d="${bandShape(o.edge, o.b, true)}" fill="#000"/>`)
-    .join('');
-  return maskDef(`band-mask-${i}`, later + flowerHoles);
+// 要素を1つ足すたびに、それまでの全体をその要素の外形で切り抜く（入れ子の mask）
+const masks: string[] = [];
+let body = '';
+items.forEach((it, i) => {
+  if (i > 0) {
+    masks.push(
+      `<mask id="m${i}" maskUnits="userSpaceOnUse" x="0" y="0" width="${W}" height="${H}"><rect width="${W}" height="${H}" fill="#fff"/><g fill="#000" stroke="none">${it.sil}</g></mask>`,
+    );
+    body = `<g mask="url(#m${i})">${body}</g>`;
+  }
+  body += `\n${it.draw}`;
 });
-const flowerMasks = FLOWERS.map((_, i) => maskDef(`flower-mask-${i}`, FLOWERS.slice(i + 1).map(hole).join('')));
-const masks = [...bandMasks, ...flowerMasks].join('\n  ');
 
-const clouds = allBands
-  .map(({ edge, b }, i) => `<g mask="url(#band-mask-${i})">${bandLines(edge, b)}</g>`)
-  .join('\n  ');
-
-const flowers = FLOWERS.map(
-  (fl, i) =>
-    `<g mask="url(#flower-mask-${i})"><g transform="translate(${fl.x} ${fl.y}) rotate(${fl.rot ?? 0})">${drawFlower(fl.kind, fl.r)}</g></g>`,
-).join('\n  ');
-
-const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round">
+const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" fill="none" stroke="#000" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
 <title>霞と花（線画）</title>
 <defs>
-  ${masks}
+${masks.join('\n')}
 </defs>
-<g stroke-width="2" stroke-opacity="0.65">
-  ${clouds}
-</g>
-<g stroke-width="1.6">
-  ${flowers}
-</g>
+${body}
 </svg>
 `;
 
