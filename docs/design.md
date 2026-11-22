@@ -77,6 +77,7 @@ public_masks:                      # 公開用の画像で伏せる語句 → �
 ```
 
 - 読込と検証は [config.ts](../src/domain/config.ts)。必須項目の欠落・空文字・不明な配色は、不備をまとめて表示して停止する
+- `map_url`（任意）は会場の地図リンク。**PNG にはクリックできるリンクを埋め込めない**ため、`npm run sample:pdf` で場所欄が `map_url` へのリンクになる PDF（500×740 px 相当の1ページ）を `samples/pdf/` に出力する。見た目は PNG と同じで、リンクは見た目に表れない。メールで画像として見せる場合は、メール本文に `map_url` を貼る
 - `public_masks` は、SNS などに公開する画像で語句を伏せるための設定（省略可）。`npm run sample:public` と `npm run overview:public`（`--public`）のときだけ、タイトルとサブタイトルの語句を置き換える。通常の画像は変わらない。公開用の個別カードは `samples/public/cards/`（Git 管理外）、一覧画像は `samples/public/overview.png`（2040×3216 px。X の 4096 px 超の縮小を避けるため、通常の一覧画像より小さい）に出力する
 - すべての文言は必須。日付は `YYYY-MM-DD`（存在する日付）、時刻は `HH:MM`（24 時間表記）で書く
 - 日付の表示形式（`2027.01.11`）と通し番号の桁数（3 桁）は文言ではなくコード（[format.ts](../src/domain/format.ts)）で決める
