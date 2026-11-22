@@ -79,8 +79,8 @@ function cloudPath({ tiers, necks, t, gap, neck }: Cloud): string {
 function cloudItem(c: Cloud): Item {
   const d = cloudPath(c);
   return {
-    draw: `<path d="${d}" stroke-width="1.45" stroke-opacity="0.9"/>`,
-    sil: `<path d="${d}" stroke="#000" stroke-width="4"/>`,
+    draw: `<path d="${d}" stroke-width="2.5" stroke-opacity="0.78"/>`,
+    sil: `<path d="${d}" stroke="#000" stroke-width="5"/>`,
   };
 }
 
@@ -204,27 +204,27 @@ function flowerItems(fl: FlowerSpec): Item[] {
 
 /** 右上：右の端から入る霞（1・3段目は画面外へ抜け、2・4段目は左右とも丸い頭） */
 const RIGHT_CLOUD: Cloud = {
-  t: 28,
-  gap: 11,
-  neck: 12,
+  t: 17,
+  gap: 12,
+  neck: 8,
   tiers: [
-    { top: 104, a: 372, b: W + 20 },
-    { top: 143, a: 304, b: 458 },
-    { top: 182, a: 384, b: W + 20 },
-    { top: 221, a: 342, b: 448 },
+    { top: 130, a: 372, b: W + 20 },
+    { top: 159, a: 304, b: 458 },
+    { top: 188, a: 384, b: W + 20 },
+    { top: 217, a: 342, b: 448 },
   ],
   necks: [402, 428, 404],
 };
 /** 左下：左の端から入る霞（右上の霞を左右反転した段の並び） */
 const LEFT_CLOUD: Cloud = {
-  t: 28,
-  gap: 11,
-  neck: 12,
+  t: 17,
+  gap: 12,
+  neck: 8,
   tiers: [
-    { top: 384, a: -20, b: 104 },
-    { top: 423, a: 26, b: 146 },
-    { top: 462, a: -20, b: 110 },
-    { top: 501, a: 40, b: 162 },
+    { top: 400, a: -20, b: 104 },
+    { top: 429, a: 26, b: 146 },
+    { top: 458, a: -20, b: 110 },
+    { top: 487, a: 40, b: 162 },
   ],
   necks: [70, 56, 80],
 };
