@@ -17,11 +17,11 @@ labels:
   guest_no: GUEST NO.
   recipient: 宛名
   datetime: 日時
-  class: クラス
+  class: 区分
   venue: 場所
   honorific: 様 # 宛名の末尾に付く
 
-# 当時のクラス（名簿の値）→ 配色（プリセット名 または #rrggbb）
+# 名簿の区分（当時のクラスなど。名簿の値）→ 配色（プリセット名 または #rrggbb）
 class_colors:
   3年1組: 白練
   3年2組: 鬱金色
@@ -31,7 +31,7 @@ class_colors:
   3年6組: 藍色
   3年7組: 江戸紫
   3年8組: 撫子色
-  教職員: 鉄黒
+  教職員等: 鉄黒
 
 # 公開用の画像（SNS など）で伏せる語句 → 置き換え後。--public を付けたときだけ、タイトルとサブタイトルに適用される
 # 例: npm run sample:public && npm run overview:public

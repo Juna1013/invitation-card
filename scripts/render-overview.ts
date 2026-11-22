@@ -40,7 +40,7 @@ const html = `<!doctype html><html lang="ja"><meta charset="utf-8"><style>
   img { display: block; width: 100%; height: auto; filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.18)); }
   figcaption { margin-top: 12px; text-align: center; font-size: 17px; }
 </style><body>
-<h1>${event.title}　招待カード　クラス別の配色一覧</h1>
+<h1>${event.title}　招待カード　区分別の配色一覧</h1>
 <p>${event.subtitle}　／　宛名は伏字のサンプルです　／　場所欄の下線とピンは、PDF でクリックできるリンクの印です</p>
 <div class="grid">${tiles.join('')}</div>
 </body></html>`;
