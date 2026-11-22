@@ -1,9 +1,9 @@
 import { flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';
-import { Card, type EventInfo, type Person } from '../card/Card';
+import { Card, type CardLabels, type EventInfo, type Person } from '../card/Card';
 import { deriveTheme } from '../domain/theme';
 
-export type RenderArgs = { event: EventInfo; person: Person; color: string };
+export type RenderArgs = { event: EventInfo; labels: CardLabels; person: Person; color: string };
 
 declare global {
   interface Window {
@@ -14,9 +14,9 @@ declare global {
 
 const root = createRoot(document.getElementById('root')!);
 
-window.renderCard = async ({ event, person, color }) => {
+window.renderCard = async ({ event, labels, person, color }) => {
   const { tokens, minContrast } = deriveTheme(color);
-  flushSync(() => root.render(<Card event={event} person={person} tokens={tokens} />));
+  flushSync(() => root.render(<Card event={event} labels={labels} person={person} tokens={tokens} />));
   await document.fonts.ready;
   // 和傘・雲と花の SVG（CSS の mask で使う）の読込完了を待つ
   const urls = [...document.querySelectorAll<HTMLElement>('.card__wagasa, .card__ornament')]
